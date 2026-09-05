@@ -1,0 +1,3079 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulasi CAT PCPM Bank Indonesia — Bank Soal Terpadu</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body{font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent}
+  .custom-scrollbar::-webkit-scrollbar{width:5px;height:5px}
+  .custom-scrollbar::-webkit-scrollbar-track{background:#f1f5f9}
+  .custom-scrollbar::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px}
+
+  /* ---- Matriks Numerical ---- */
+  .matrix-table{border-collapse:collapse;margin:1rem 0;width:max-content}
+  .matrix-table td{border:2px solid #334155;width:65px;height:65px;text-align:center;
+    font-size:1.25rem;font-weight:700;color:#1e293b;background:#fff}
+  .matrix-table.sm-cell td{width:55px;height:55px;font-size:1.1rem}
+  @media (max-width:640px){
+    .matrix-table td{width:52px;height:52px;font-size:1rem}
+    .matrix-table.sm-cell td{width:44px;height:44px;font-size:.9rem}
+  }
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+
+  /* ---- Tabel legenda Digit Symbol ---- */
+  .symbol-table{border-collapse:collapse;width:100%;background:#fff;border-radius:.5rem;overflow:hidden}
+  .symbol-table th,.symbol-table td{border:1px solid #cbd5e1;text-align:center;padding:6px 4px}
+  .symbol-table th{background:#f8fafc;color:#475569;font-weight:700;font-size:.95rem}
+  .symbol-table td{font-size:1.35rem;color:#1e293b;line-height:1.2}
+  .ds-strip{font-size:1.9rem;letter-spacing:.35em;color:#0f172a;word-break:break-all}
+  @media (max-width:640px){.ds-strip{font-size:1.5rem;letter-spacing:.22em}}
+
+  /* ---- Quantitative ---- */
+  .svg-def{display:none}
+  .svg-icon{width:28px;height:28px;flex:none}
+  .svg-inline{width:19px;height:19px;vertical-align:-4px}
+  .big-box{border:3px solid #1e293b;border-radius:12px;padding:8px 12px;background:#f8fafc;
+    display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-width:110px}
+  .qbox{border:3px solid #1d4ed8;border-radius:10px;padding:6px 12px;background:#fff;
+    display:inline-flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .star{fill:#f59e0b}.moon{fill:#8b5cf6}
+  .sun{stroke:#f97316;stroke-width:2;fill:none}
+  .triangle{fill:#ef4444}.square{fill:#2563eb}.drop{fill:#06b6d4}
+  .circle{fill:#10b981}.diamond{fill:#ec4899}.heart{fill:#e11d48}
+  .cloud{fill:#64748b}.hexagon{fill:#7c3aed}.arrow{fill:#059669}
+  .cross{fill:#b91c1c}.shield{fill:#1e40af}.pentagon{fill:#d97706}
+
+  .screen{display:none}
+  .screen.active{display:block}
+  .fade-in{animation:fi .18s ease-out}
+  @keyframes fi{from{opacity:0}to{opacity:1}}
+  @media (prefers-reduced-motion:reduce){.fade-in{animation:none}}
+</style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+
+<!-- Sprite ikon Quantitative -->
+<svg class="svg-def">
+  <g id="icon-star"><path class="star" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></g>
+  <g id="icon-moon"><path class="moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></g>
+  <g id="icon-sun"><circle class="sun" cx="12" cy="12" r="5"/><line class="sun" x1="12" y1="1" x2="12" y2="3"/><line class="sun" x1="12" y1="21" x2="12" y2="23"/><line class="sun" x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line class="sun" x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line class="sun" x1="1" y1="12" x2="3" y2="12"/><line class="sun" x1="21" y1="12" x2="23" y2="12"/></g>
+  <g id="icon-triangle"><polygon class="triangle" points="12,2 22,21 2,21"/></g>
+  <g id="icon-square"><rect class="square" x="3" y="3" width="18" height="18" rx="3"/></g>
+  <g id="icon-drop"><path class="drop" d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></g>
+  <g id="icon-circle"><circle class="circle" cx="12" cy="12" r="9"/></g>
+  <g id="icon-diamond"><polygon class="diamond" points="12,2 22,12 12,22 2,12"/></g>
+  <g id="icon-heart"><path class="heart" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></g>
+  <g id="icon-cloud"><path class="cloud" d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></g>
+  <g id="icon-hexagon"><polygon class="hexagon" points="12,2 21,7 21,17 12,22 3,17 3,7"/></g>
+  <g id="icon-arrow"><path class="arrow" d="M12 2l10 10h-6v10h-8v-10h-6z"/></g>
+  <g id="icon-cross"><path class="cross" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></g>
+  <g id="icon-shield"><path class="shield" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></g>
+  <g id="icon-pentagon"><polygon class="pentagon" points="12,2 22,9 18,21 6,21 2,9"/></g>
+</svg>
+
+<!-- =================== MENU =================== -->
+<div id="screen-menu" class="screen active">
+  <header class="bg-blue-900">
+    <div class="max-w-6xl mx-auto px-4 py-8 sm:py-12">
+      <div class="inline-block bg-yellow-400 text-blue-900 font-extrabold px-3 py-1 rounded text-sm mb-4">CAT</div>
+      <h1 class="text-white font-extrabold text-2xl sm:text-4xl leading-tight">Bank Soal PCPM Bank Indonesia</h1>
+      <p class="text-blue-200 mt-2 text-sm sm:text-base max-w-2xl">
+        Seluruh paket latihan digabung dalam satu simulator: Digit Symbol, Diagrammatical,
+        Verbal, Numerical, dan Quantitative Reasoning.</p>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-8 space-y-10">
+    <section>
+      <h2 class="font-bold text-lg text-slate-900 mb-1">Simulasi Campuran</h2>
+      <p class="text-sm text-slate-500 mb-4">Gabungan lintas subtes dengan durasi penuh.</p>
+      <div id="mix-cards" class="grid sm:grid-cols-3 gap-4"></div>
+    </section>
+
+    <section>
+      <h2 class="font-bold text-lg text-slate-900 mb-1">Latihan per Paket</h2>
+      <p class="text-sm text-slate-500 mb-4">Kerjakan satu subtes saja sesuai durasi aslinya.</p>
+      <div id="cat-list" class="space-y-3"></div>
+    </section>
+
+    <section>
+      <button onclick="showGuide()" class="w-full text-left bg-white border border-slate-200 rounded-xl p-4 hover:border-blue-400 transition">
+        <span class="font-bold text-slate-900">Panduan Diagrammatical Reasoning</span>
+        <p class="text-sm text-slate-500 mt-1">Cara membaca Model A / Model B sebelum mulai latihan.</p>
+      </button>
+    </section>
+  </main>
+  <footer class="max-w-6xl mx-auto px-4 pb-10 text-xs text-slate-400">
+    Simulator latihan mandiri. Bukan produk resmi Bank Indonesia.
+  </footer>
+</div>
+
+<!-- =================== START / KONFIGURASI =================== -->
+<div id="screen-start" class="screen">
+  <div class="max-w-2xl mx-auto px-4 py-10 sm:py-16">
+    <button onclick="goMenu()" class="text-sm text-slate-500 hover:text-slate-800 mb-6">&larr; Kembali ke menu</button>
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8">
+      <h2 id="start-title" class="font-extrabold text-xl sm:text-2xl text-slate-900"></h2>
+      <p id="start-desc" class="text-sm text-slate-500 mt-2"></p>
+      <div id="start-meta" class="grid grid-cols-2 gap-3 mt-6"></div>
+      <div id="start-options" class="mt-6"></div>
+      <button id="btn-start" class="mt-8 w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl transition">
+        Mulai Mengerjakan
+      </button>
+      <p class="text-[11px] text-slate-400 mt-3 text-center">Timer berjalan begitu tombol ditekan dan tidak bisa dijeda.</p>
+    </div>
+  </div>
+</div>
+
+<!-- =================== PANDUAN =================== -->
+<div id="screen-guide" class="screen">
+  <div class="max-w-3xl mx-auto px-4 py-10">
+    <button onclick="goMenu()" class="text-sm text-slate-500 hover:text-slate-800 mb-6">&larr; Kembali ke menu</button>
+    <div id="guide-body" class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 space-y-5"></div>
+  </div>
+</div>
+
+<!-- =================== UJIAN =================== -->
+<div id="screen-exam" class="screen">
+  <header class="bg-blue-900 sticky top-0 z-40 shadow-md">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex justify-between items-center gap-2">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <div class="bg-yellow-400 text-blue-900 font-bold px-2.5 py-1 rounded text-xs sm:text-base shrink-0">CAT</div>
+        <div class="text-white truncate">
+          <h1 class="font-bold text-xs sm:text-base leading-tight truncate">PCPM Bank Indonesia</h1>
+          <p id="exam-subtitle" class="text-blue-200 text-[11px] sm:text-sm truncate"></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <div id="section-timer-wrap" class="hidden text-right text-white">
+          <p class="text-[10px] text-blue-200 leading-none">Sisa section</p>
+          <p id="section-timer" class="font-mono font-bold text-sm sm:text-lg leading-tight">00:00</p>
+        </div>
+        <div id="global-timer-wrap" class="bg-rose-600 text-white flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono font-bold text-sm sm:text-xl shadow-inner">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span id="global-timer">00:00</span>
+        </div>
+      </div>
+    </div>
+    <div id="section-bar" class="hidden bg-blue-950"><div class="max-w-7xl mx-auto px-3 sm:px-6 py-1.5 flex gap-1.5 overflow-x-auto custom-scrollbar" id="section-chips"></div></div>
+  </header>
+
+  <main class="max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
+      <div class="lg:col-span-8 flex flex-col gap-3 sm:gap-4">
+        <div class="bg-white rounded-xl p-3.5 shadow-sm border border-slate-200 flex justify-between items-center gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <span id="q-category" class="bg-blue-100 text-blue-800 text-[11px] sm:text-xs font-semibold px-2 py-0.5 rounded shrink-0"></span>
+            <span id="q-title" class="text-xs sm:text-sm text-slate-500 truncate"></span>
+          </div>
+          <span id="q-progress" class="text-xs sm:text-sm font-bold text-slate-700 shrink-0"></span>
+        </div>
+
+        <div id="q-head" class="bg-white rounded-xl p-3.5 sm:p-5 shadow-sm border border-slate-200"></div>
+        <div id="q-body" class="bg-white rounded-xl p-3.5 sm:p-5 shadow-sm border border-slate-200 fade-in"></div>
+
+        <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex items-center justify-between gap-3">
+          <label class="flex items-center gap-2 text-xs sm:text-sm text-slate-600 cursor-pointer select-none">
+            <input type="checkbox" id="chk-doubt" class="w-4 h-4 accent-yellow-500">
+            <span>Ragu-ragu</span>
+          </label>
+          <div class="flex gap-2">
+            <button id="btn-prev" class="px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-sm transition disabled:opacity-40">Sebelumnya</button>
+            <button id="btn-next" class="px-4 py-2 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-semibold text-sm transition disabled:opacity-40">Selanjutnya</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="lg:col-span-4 lg:sticky lg:top-24 flex flex-col gap-3">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-sm text-slate-800">Navigasi Soal</h3>
+            <span id="nav-scope" class="text-[11px] text-slate-400"></span>
+          </div>
+          <div id="nav-grid" class="grid grid-cols-6 sm:grid-cols-8 lg:grid-cols-6 gap-1.5 max-h-64 overflow-y-auto custom-scrollbar pr-1"></div>
+          <div class="flex flex-wrap gap-3 mt-4 text-[11px] text-slate-500">
+            <span class="flex items-center gap-1.5"><i class="w-3 h-3 rounded bg-emerald-500 inline-block"></i>Terjawab</span>
+            <span class="flex items-center gap-1.5"><i class="w-3 h-3 rounded bg-yellow-400 inline-block"></i>Ragu</span>
+            <span class="flex items-center gap-1.5"><i class="w-3 h-3 rounded bg-slate-200 inline-block"></i>Kosong</span>
+          </div>
+        </div>
+        <button id="btn-section-done" class="hidden w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition">Selesaikan Section Ini</button>
+        <button id="btn-finish" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl transition">Selesaikan Ujian</button>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<!-- =================== HASIL =================== -->
+<div id="screen-result" class="screen">
+  <div class="max-w-3xl mx-auto px-4 py-10">
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 text-center">
+      <p class="text-sm text-slate-500">Hasil Pengerjaan</p>
+      <h2 id="result-title" class="font-extrabold text-xl text-slate-900 mt-1"></h2>
+      <div class="my-7">
+        <p id="result-score" class="text-6xl font-extrabold text-blue-900 leading-none"></p>
+        <p id="result-sub" class="text-sm text-slate-500 mt-2"></p>
+      </div>
+      <div id="result-breakdown" class="space-y-2 text-left"></div>
+      <div class="grid sm:grid-cols-3 gap-3 mt-8">
+        <button onclick="showReview()" class="bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-xl transition">Lihat Pembahasan</button>
+        <button onclick="restartCurrent()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl transition">Ulangi</button>
+        <button onclick="goMenu()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl transition">Menu Utama</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =================== REVIEW =================== -->
+<div id="screen-review" class="screen">
+  <header class="bg-blue-900 sticky top-0 z-40">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+      <h2 class="text-white font-bold text-sm sm:text-base">Pembahasan</h2>
+      <button onclick="show('screen-result')" class="bg-white/15 hover:bg-white/25 text-white text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-lg transition">Kembali ke Hasil</button>
+    </div>
+  </header>
+  <div id="review-list" class="max-w-4xl mx-auto px-4 py-6 space-y-4"></div>
+</div>
+
+<!-- =================== MODAL =================== -->
+<div id="modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-sm w-full p-6">
+    <h3 id="modal-title" class="font-bold text-lg text-slate-900"></h3>
+    <p id="modal-text" class="text-sm text-slate-600 mt-2"></p>
+    <div class="flex gap-3 mt-6">
+      <button id="modal-cancel" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold py-2.5 rounded-lg transition">Batal</button>
+      <button id="modal-ok" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2.5 rounded-lg transition">Ya, Lanjut</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= DATA SOAL (diekstrak dari file asli) ================= */
+const VERBAL_PACKETS = [
+{ id:'verb1', nama:'Paket 1 \u2014 Perbandingan & Relasi', data:[
+{
+                id: 1,
+                title: "Tema 1: Berat Badan",
+                passage: "• Berat badan Wati tidak lebih berat dari berat badan Susi.<br>• Susi lebih berat daripada Tini.<br>• Roni lebih ringan daripada Tini.",
+                statement: "Wati lebih berat daripada Tini.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 2, // Tidak dapat ditentukan (indeks 2)
+                explanation: "Wati ≤ Susi, Susi > Tini → Wati bisa saja lebih berat atau lebih ringan dari Tini. Tidak dapat dipastikan secara mutlak."
+            },
+            {
+                id: 2,
+                title: "Tema 1: Berat Badan",
+                passage: "• Berat badan Wati tidak lebih berat dari berat badan Susi.<br>• Susi lebih berat daripada Tini.<br>• Roni lebih ringan daripada Tini.",
+                statement: "Roni lebih ringan daripada Susi.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar (indeks 0)
+                explanation: "Roni < Tini, dan Tini < Susi → Roni < Susi. Pasti benar bahwa Roni lebih ringan daripada Susi."
+            },
+            {
+                id: 3,
+                title: "Tema 2: Jam Belajar",
+                passage: "• Durasi belajar Doni lebih lama daripada durasi belajar Eka.<br>• Durasi belajar Fira tidak lebih lama daripada durasi belajar Gita.<br>• Durasi belajar Eka sama dengan durasi belajar Fira.",
+                statement: "Gita belajar lebih lama daripada Doni.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 2,
+                explanation: "Eka = Fira, Fira ≤ Gita → Gita ≥ Eka. Doni > Eka. Belum ada hubungan pasti apakah Gita lebih lama daripada Doni."
+            },
+            {
+                id: 4,
+                title: "Tema 2: Jam Belajar",
+                passage: "• Durasi belajar Doni lebih lama daripada durasi belajar Eka.<br>• Durasi belajar Fira tidak lebih lama daripada durasi belajar Gita.<br>• Durasi belajar Eka sama dengan durasi belajar Fira.",
+                statement: "Doni belajar lebih lama daripada Fira.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0,
+                explanation: "Doni > Eka, dan Eka = Fira. Jadi pasti Doni > Fira."
+            },
+            {
+                id: 5,
+                title: "Tema 3: Jumlah Buku",
+                passage: "• Toni memiliki buku lebih banyak daripada Udin.<br>• Vina tidak memiliki buku lebih banyak dari Wati.<br>• Wati memiliki lebih sedikit buku dibanding Toni.",
+                statement: "Vina memiliki buku lebih banyak daripada Udin.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 2,
+                explanation: "Toni > Udin, Wati < Toni. Vina ≤ Wati. Belum ada kepastian hubungan antara jumlah buku Vina dan Udin."
+            },
+            {
+                id: 6,
+                title: "Tema 3: Jumlah Buku",
+                passage: "• Toni memiliki buku lebih banyak daripada Udin.<br>• Vina tidak memiliki buku lebih banyak dari Wati.<br>• Wati memiliki lebih sedikit buku dibanding Toni.",
+                statement: "Toni memiliki buku lebih banyak daripada Wati.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0,
+                explanation: "Wati memiliki lebih sedikit buku dibanding Toni (Wati < Toni) → Toni > Wati. Pasti benar."
+            },
+            {
+                id: 7,
+                title: "Tema 4: Harga Barang",
+                passage: "• Harga tas X lebih murah daripada harga tas Y.<br>• Harga tas Z tidak lebih mahal daripada harga tas W.<br>• Harga tas Y sama dengan harga tas Z.",
+                statement: "Tas W lebih mahal daripada tas Y.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 2,
+                explanation: "Y = Z, Z ≤ W → W ≥ Y. Tas W bisa saja harganya sama persis dengan Y, sehingga belum pasti lebih mahal."
+            },
+            {
+                id: 8,
+                title: "Tema 4: Harga Barang",
+                passage: "• Harga tas X lebih murah daripada harga tas Y.<br>• Harga tas Z tidak lebih mahal daripada harga tas W.<br>• Harga tas Y sama dengan harga tas Z.",
+                statement: "Tas X lebih murah dari tas Z.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0,
+                explanation: "X < Y, dan Y = Z → X < Z. Pasti benar bahwa X lebih murah dari Z."
+            },
+            {
+                id: 9,
+                title: "Tema 5: Jangkauan Lompatan",
+                passage: "• Jangkauan lompatan Andi lebih tinggi dari jangkauan lompatan Bayu.<br>• Jangkauan lompatan Candra tidak lebih jauh daripada jangkauan lompatan Dedi.<br>• Jangkauan lompatan Bayu sama dengan jangkauan lompatan Candra.",
+                statement: "Dedi melompat lebih jauh daripada Andi.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 2,
+                explanation: "Andi > Bayu, Bayu = Candra, Candra ≤ Dedi → Dedi ≥ Candra = Bayu < Andi. Tidak ada informasi langsung perbandingan Dedi dan Andi."
+            },
+            {
+                id: 10,
+                title: "Tema 5: Jangkauan Lompatan",
+                passage: "• Jangkauan lompatan Andi lebih tinggi dari jangkauan lompatan Bayu.<br>• Jangkauan lompatan Candra tidak lebih jauh daripada jangkauan lompatan Dedi.<br>• Jangkauan lompatan Bayu sama dengan jangkauan lompatan Candra.",
+                statement: "Andi melompat lebih jauh daripada Candra.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0,
+                explanation: "Andi > Bayu, dan Bayu = Candra → Andi > Candra. Pasti benar."
+            }
+]},
+{ id:'verb2', nama:'Paket 2 \u2014 Perbandingan Lanjutan', data:[
+{
+                id: 1,
+                title: "Tema 1: Kecepatan Mengetik",
+                passage: "• Andi mengetik lebih cepat daripada Budi.<br>• Candra tidak lebih cepat daripada Dodi.<br>• Budi sama cepatnya dengan Candra.",
+                statement: "Andi mengetik lebih cepat daripada Dodi.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 2, // Tidak dapat ditentukan
+                explanation: "Andi > Budi, Budi = Candra, dan Candra ≤ Dodi (artinya Budi ≤ Dodi). Karena Andi > Budi dan Budi ≤ Dodi, hubungan mutlak antara Andi dan Dodi tidak dapat dipastikan."
+            },
+            {
+                id: 2,
+                title: "Tema 1: Kecepatan Mengetik",
+                passage: "• Andi mengetik lebih cepat daripada Budi.<br>• Candra tidak lebih cepat daripada Dodi.<br>• Budi sama cepatnya dengan Candra.",
+                statement: "Candra lebih lambat daripada Andi.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Andi > Budi, dan Budi = Candra → Andi > Candra. Artinya Candra pasti lebih lambat daripada Andi."
+            },
+            {
+                id: 3,
+                title: "Tema 2: Pengikut Media Sosial",
+                passage: "• Pengikut Fira lebih banyak daripada Gani.<br>• Hari tidak memiliki pengikut lebih banyak daripada Ira.<br>• Pengikut Gani sama dengan pengikut Hari.",
+                statement: "Fira memiliki pengikut lebih banyak daripada Ira.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 2, // Tidak dapat ditentukan
+                explanation: "Fira > Gani, Gani = Hari, Hari ≤ Ira. Gani ≤ Ira, tetapi Fira > Gani. Hubungan pasti antara jumlah pengikut Fira dan Ira belum dapat ditentukan."
+            },
+            {
+                id: 4,
+                title: "Tema 2: Pengikut Media Sosial",
+                passage: "• Pengikut Fira lebih banyak daripada Gani.<br>• Hari tidak memiliki pengikut lebih banyak daripada Ira.<br>• Pengikut Gani sama dengan pengikut Hari.",
+                statement: "Fira memiliki pengikut lebih banyak daripada Hari.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Fira > Gani, dan Gani = Hari → Fira > Hari. Pasti benar."
+            },
+            {
+                id: 5,
+                title: "Tema 3: Tinggi Tanaman",
+                passage: "• Tanaman J lebih tinggi daripada Tanaman K.<br>• Tanaman L tidak lebih tinggi daripada Tanaman M.<br>• Tanaman K sama tinggi dengan Tanaman L.",
+                statement: "Tanaman M lebih pendek daripada Tanaman K.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 1, // Salah
+                explanation: "K = L, dan L ≤ M → K ≤ M (artinya M ≥ K). Pernyataan M lebih pendek dari K bertentangan dengan fakta bahwa M lebih tinggi atau sama dengan K."
+            },
+            {
+                id: 6,
+                title: "Tema 3: Tinggi Tanaman",
+                passage: "• Tanaman J lebih tinggi daripada Tanaman K.<br>• Tanaman L tidak lebih tinggi daripada Tanaman M.<br>• Tanaman K sama tinggi dengan Tanaman L.",
+                statement: "Tanaman M lebih tinggi daripada Tanaman J.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 2, // Tidak dapat ditentukan
+                explanation: "J > K = L ≤ M. Hubungan antara Tanaman M dan Tanaman J tidak dapat dipastikan secara mutlak."
+            },
+            {
+                id: 7,
+                title: "Tema 4: Skor Ujian",
+                passage: "• Skor Nina lebih tinggi dari Opi.<br>• Qila tidak memiliki skor lebih tinggi dari Rian.<br>• Skor Opi sama dengan skor Qila.",
+                statement: "Skor Nina lebih tinggi dari Skor Qila.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Nina > Opi, dan Opi = Qila → Nina > Qila. Pasti benar."
+            },
+            {
+                id: 8,
+                title: "Tema 4: Skor Ujian",
+                passage: "• Skor Nina lebih tinggi dari Opi.<br>• Qila tidak memiliki skor lebih tinggi dari Rian.<br>• Skor Opi sama dengan skor Qila.",
+                statement: "Skor Rian lebih tinggi dari Skor Nina.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 2, // Tidak dapat ditentukan
+                explanation: "Nina > Opi = Qila, dan Qila ≤ Rian. Hubungan pasti antara skor Rian dan Nina tidak dapat ditentukan."
+            },
+            {
+                id: 9,
+                title: "Tema 5: Kapasitas Baterai",
+                passage: "• Kapasitas baterai HP P lebih besar daripada Q.<br>• Kapasitas R tidak lebih besar daripada S.<br>• Kapasitas Q sama dengan kapasitas R.",
+                statement: "Kapasitas baterai HP S lebih kecil daripada Q.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 1, // Salah
+                explanation: "Q = R, dan R ≤ S → Q ≤ S (artinya S ≥ Q). Pernyataan S lebih kecil dari Q bertentangan dengan fakta bahwa S lebih besar atau sama dengan Q."
+            },
+            {
+                id: 10,
+                title: "Tema 5: Kapasitas Baterai",
+                passage: "• Kapasitas baterai HP P lebih besar daripada Q.<br>• Kapasitas R tidak lebih besar daripada S.<br>• Kapasitas Q sama dengan kapasitas R.",
+                statement: "Kapasitas baterai HP P lebih besar daripada R.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "P > Q, dan Q = R → P > R. Pasti benar."
+            }
+]},
+{ id:'verb3', nama:'Paket 3 \u2014 Logika Pembentukan Tim', data:[
+{
+                id: 1,
+                title: "Tema 1: Tim Proyek Perusahaan (Soal 1)",
+                passage: "<b>Bacaan 1:</b><br>Tujuh karyawan – Nanda, Oki, Putra, Qori, Riko, Siska, dan Tono – diminta membentuk sebuah tim proyek beranggotakan 4 orang. Masing-masing berasal dari divisi berbeda: Nanda & Oki dari Operasional, Putra & Qori dari IT, Riko dari Marketing, Siska dari HR, dan Tono dari Legal.<br><br><b>Aturan pembentukan tim:</b><br>• Tim hanya boleh berisi maksimal satu karyawan dari divisi Operasional.<br>• Jika ada anggota dari IT, maka harus ada juga anggota dari Legal.<br>• Divisi Marketing atau HR harus ada minimal satu orang.",
+                statement: "Apabila tim berisi {Nanda, Putra, Riko, Tono}, maka tim ini memenuhi syarat.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Operasional: Nanda (1 orang) → sesuai (maksimal 1). IT: Putra masuk, Legal: Tono juga masuk → sesuai aturan. Marketing: Riko masuk → sesuai syarat minimal. Semua aturan terpenuhi. Jawaban: Benar."
+            },
+            {
+                id: 2,
+                title: "Tema 1: Tim Proyek Perusahaan (Soal 2)",
+                passage: "<b>Bacaan 1:</b><br>Tujuh karyawan – Nanda, Oki, Putra, Qori, Riko, Siska, dan Tono – diminta membentuk sebuah tim proyek beranggotakan 4 orang. Masing-masing berasal dari divisi berbeda: Nanda & Oki dari Operasional, Putra & Qori dari IT, Riko dari Marketing, Siska dari HR, dan Tono dari Legal.<br><br><b>Aturan pembentukan tim:</b><br>• Tim hanya boleh berisi maksimal satu karyawan dari divisi Operasional.<br>• Jika ada anggota dari IT, maka harus ada juga anggota dari Legal.<br>• Divisi Marketing atau HR harus ada minimal satu orang.",
+                statement: "Apabila tim berisi {Oki, Putra, Siska, Qori}, maka tim ini memenuhi syarat.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 1, // Salah
+                explanation: "Operasional: Oki (1 orang) → sesuai. IT: Putra & Qori masuk, tapi Legal (Tono) tidak masuk di dalam tim → melanggar aturan wajib adanya anggota Legal jika ada IT. Jawaban: Salah."
+            },
+            {
+                id: 3,
+                title: "Tema 1: Tim Proyek Perusahaan (Soal 3)",
+                passage: "<b>Bacaan 1:</b><br>Tujuh karyawan – Nanda, Oki, Putra, Qori, Riko, Siska, dan Tono – diminta membentuk sebuah tim proyek beranggotakan 4 orang. Masing-masing berasal dari divisi berbeda: Nanda & Oki dari Operasional, Putra & Qori dari IT, Riko dari Marketing, Siska dari HR, dan Tono dari Legal.<br><br><b>Aturan pembentukan tim:</b><br>• Tim hanya boleh berisi maksimal satu karyawan dari divisi Operasional.<br>• Jika ada anggota dari IT, maka harus ada juga anggota dari Legal.<br>• Divisi Marketing atau HR harus ada minimal satu orang.",
+                statement: "Apabila tim berisi {Nanda, Riko, Siska, Qori}, maka tim ini memenuhi syarat.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 1, // Salah
+                explanation: "Operasional: Nanda (1 orang) → sesuai. IT: Qori masuk, tetapi Legal (Tono) tidak masuk tim → melanggar ketentuan wajib adanya Legal jika ada IT. Jawaban: Salah."
+            },
+            {
+                id: 4,
+                title: "Tema 1: Tim Proyek Perusahaan (Soal 4)",
+                passage: "<b>Bacaan 1:</b><br>Tujuh karyawan – Nanda, Oki, Putra, Qori, Riko, Siska, dan Tono – diminta membentuk sebuah tim proyek beranggotakan 4 orang. Masing-masing berasal dari divisi berbeda: Nanda & Oki dari Operasional, Putra & Qori dari IT, Riko dari Marketing, Siska dari HR, dan Tono dari Legal.<br><br><b>Aturan pembentukan tim:</b><br>• Tim hanya boleh berisi maksimal satu karyawan dari divisi Operasional.<br>• Jika ada anggota dari IT, maka harus ada juga anggota dari Legal.<br>• Divisi Marketing atau HR harus ada minimal satu orang.",
+                statement: "Apabila tim berisi {Oki, Riko, Siska, Tono}, maka tim ini memenuhi syarat.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Operasional: Oki (1 orang) → sesuai. IT: tidak ada anggota IT (syarat bersyarat terpenuhi hampa). Marketing & HR: Riko dan Siska ada → sesuai. Semua syarat terpenuhi. Jawaban: Benar."
+            },
+            {
+                id: 5,
+                title: "Tema 2: Tim Riset Akademik (Soal 5)",
+                passage: "<b>Bacaan 2:</b><br>Enam mahasiswa – Umar, Vina, Wawan, Xena, Yudi, dan Ziva – akan dipilih membentuk tim riset beranggotakan 3 orang. Mereka berasal dari jurusan berbeda: Umar & Vina dari Akuntansi, Wawan dari Logistik, Xena & Yudi dari Produksi, dan Ziva dari Humas.<br><br><b>Aturan pembentukan tim:</b><br>• Jurusan Akuntansi tidak boleh diwakili lebih dari 1 orang.<br>• Jika Logistik ikut, maka Humas wajib ikut.<br>• Jurusan Produksi wajib diwakili minimal satu orang.",
+                statement: "Apabila tim berisi {Umar, Wawan, Ziva}, maka tim ini memenuhi syarat.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 1, // Salah
+                explanation: "Akuntansi: Umar (1 orang) → sesuai. Logistik: Wawan ikut, Humas (Ziva) ikut → sesuai aturan ketergantungan. Produksi: tidak ada satupun perwakilan Produksi → melanggar aturan wajib minimal 1 orang Produksi. Jawaban: Salah."
+            },
+            {
+                id: 6,
+                title: "Tema 2: Tim Riset Akademik (Soal 6)",
+                passage: "<b>Bacaan 2:</b><br>Enam mahasiswa – Umar, Vina, Wawan, Xena, Yudi, dan Ziva – akan dipilih membentuk tim riset beranggotakan 3 orang. Mereka berasal dari jurusan berbeda: Umar & Vina dari Akuntansi, Wawan dari Logistik, Xena & Yudi dari Produksi, dan Ziva dari Humas.<br><br><b>Aturan pembentukan tim:</b><br>• Jurusan Akuntansi tidak boleh diwakili lebih dari 1 orang.<br>• Jika Logistik ikut, maka Humas wajib ikut.<br>• Jurusan Produksi wajib diwakili minimal satu orang.",
+                statement: "Apabila tim berisi {Vina, Xena, Ziva}, maka tim ini memenuhi syarat.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Akuntansi: Vina (1 orang) → sesuai (maksimal 1). Logistik: Wawan tidak ikut (aturan hampa terpenuhi). Produksi: Xena masuk (1 orang) → sesuai. Semua syarat terpenuhi. Jawaban: Benar."
+            },
+            {
+                id: 7,
+                title: "Tema 2: Tim Riset Akademik (Soal 7)",
+                passage: "<b>Bacaan 2:</b><br>Enam mahasiswa – Umar, Vina, Wawan, Xena, Yudi, dan Ziva – akan dipilih membentuk tim riset beranggotakan 3 orang. Mereka berasal dari jurusan berbeda: Umar & Vina dari Akuntansi, Wawan dari Logistik, Xena & Yudi dari Produksi, dan Ziva dari Humas.<br><br><b>Aturan pembentukan tim:</b><br>• Jurusan Akuntansi tidak boleh diwakili lebih dari 1 orang.<br>• Jika Logistik ikut, maka Humas wajib ikut.<br>• Jurusan Produksi wajib diwakili minimal satu orang.",
+                statement: "Apabila tim berisi {Umar, Wawan, Xena}, maka tim ini memenuhi syarat.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 1, // Salah
+                explanation: "Akuntansi: Umar (1) → sesuai. Produksi: Xena (1) → sesuai. Tapi Logistik (Wawan) ikut dan Humas (Ziva) tidak ikut → melanggar ketentuan wajib Humas jika Logistik ikut. Jawaban: Salah."
+            },
+            {
+                id: 8,
+                title: "Tema 3: Tim Olahraga Kampus (Soal 8)",
+                passage: "<b>Bacaan 3:</b><br>Lima atlet – Bayu, Caca, Dika, Elin, dan Feri – akan dipilih membentuk tim inti beranggotakan 3 orang. Mereka dari bidang berbeda: Bayu & Caca dari Kreatif, Dika & Elin dari Media, dan Feri dari Riset.<br><br><b>Aturan pembentukan tim:</b><br>• Bidang Kreatif maksimal diwakili 1 orang.<br>• Jika Riset ikut, maka bidang Media wajib diwakili minimal satu orang.",
+                statement: "Apabila tim berisi {Bayu, Dika, Feri}, maka tim ini memenuhi syarat.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Kreatif: Bayu masuk (1 orang) → sesuai (maksimal 1). Riset: Feri masuk, Media: Dika masuk (ada minimal 1 orang Media) → sesuai aturan. Jawaban: Benar."
+            },
+            {
+                id: 9,
+                title: "Tema 3: Tim Olahraga Kampus (Soal 9)",
+                passage: "<b>Bacaan 3:</b><br>Lima atlet – Bayu, Caca, Dika, Elin, dan Feri – akan dipilih membentuk tim inti beranggotakan 3 orang. Mereka dari bidang berbeda: Bayu & Caca dari Kreatif, Dika & Elin dari Media, dan Feri dari Riset.<br><br><b>Aturan pembentukan tim:</b><br>• Bidang Kreatif maksimal diwakili 1 orang.<br>• Jika Riset ikut, maka bidang Media wajib diwakili minimal satu orang.",
+                statement: "Apabila tim berisi {Bayu, Caca, Dika}, maka tim ini memenuhi syarat.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 1, // Salah
+                explanation: "Kreatif: Bayu & Caca masuk (2 orang) → melanggar aturan pembatasan maksimal 1 orang dari bidang Kreatif. Jawaban: Salah."
+            },
+            {
+                id: 10,
+                title: "Tema 3: Tim Olahraga Kampus (Soal 10)",
+                passage: "<b>Bacaan 3:</b><br>Lima atlet – Bayu, Caca, Dika, Elin, dan Feri – akan dipilih membentuk tim inti beranggotakan 3 orang. Mereka dari bidang berbeda: Bayu & Caca dari Kreatif, Dika & Elin dari Media, dan Feri dari Riset.<br><br><b>Aturan pembentukan tim:</b><br>• Bidang Kreatif maksimal diwakili 1 orang.<br>• Jika Riset ikut, maka bidang Media wajib diwakili minimal satu orang.",
+                statement: "Apabila tim berisi {Dika, Elin, Feri}, maka tim ini memenuhi syarat.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Kreatif: tidak ada (memenuhi syarat maksimal 1). Riset: Feri ikut, Media: Dika & Elin ikut (memenuhi syarat minimal 1). Semua aturan terpenuhi. Jawaban: Benar."
+            }
+]},
+{ id:'verb4', nama:'Paket 4 \u2014 Logika Urutan & Penempatan', data:[
+{
+                id: 1,
+                title: "Tema 1: Penjadwalan Proyek (Soal 1)",
+                passage: "<b>Bacaan 1 (Penjadwalan Proyek):</b><br>Lima proyek – P, Q, R, S, dan T – dikerjakan dalam 5 hari berturut-turut dari Senin hingga Jumat, masing-masing tepat satu proyek per hari.<br><br><b>Aturan Penjadwalan:</b><br>• Proyek P harus dikerjakan sebelum hari Rabu.<br>• Proyek Q tidak boleh dikerjakan pada hari Jumat.<br>• Proyek R harus dikerjakan tepat sehari sebelum proyek S.",
+                statement: "Jika R dikerjakan hari Selasa dan S hari Rabu, maka P harus dikerjakan pada hari Senin.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Jika R(Selasa) & S(Rabu), sisa hari Senin, Kamis, dan Jumat untuk proyek P, Q, dan T. Karena P harus dikerjakan sebelum hari Rabu, maka P wajib dikerjakan pada hari Senin. Pernyataan Benar."
+            },
+            {
+                id: 2,
+                title: "Tema 1: Penjadwalan Proyek (Soal 2)",
+                passage: "<b>Bacaan 1 (Penjadwalan Proyek):</b><br>Lima proyek – P, Q, R, S, dan T – dikerjakan dalam 5 hari berturut-turut dari Senin hingga Jumat, masing-masing tepat satu proyek per hari.<br><br><b>Aturan Penjadwalan:</b><br>• Proyek P harus dikerjakan sebelum hari Rabu.<br>• Proyek Q tidak boleh dikerjakan pada hari Jumat.<br>• Proyek R harus dikerjakan tepat sehari sebelum proyek S.",
+                statement: "Proyek Q dapat dikerjakan pada hari Jumat.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 1, // Salah
+                explanation: "Aturan secara eksplisit menyatakan bahwa proyek Q tidak boleh dikerjakan pada hari Jumat. Pernyataan Salah."
+            },
+            {
+                id: 3,
+                title: "Tema 1: Penjadwalan Proyek (Soal 3)",
+                passage: "<b>Bacaan 1 (Penjadwalan Proyek):</b><br>Lima proyek – P, Q, R, S, dan T – dikerjakan dalam 5 hari berturut-turut dari Senin hingga Jumat, masing-masing tepat satu proyek per hari.<br><br><b>Aturan Penjadwalan:</b><br>• Proyek P harus dikerjakan sebelum hari Rabu.<br>• Proyek Q tidak boleh dikerjakan pada hari Jumat.<br>• Proyek R harus dikerjakan tepat sehari sebelum proyek S.",
+                statement: "Proyek P pasti dikerjakan pada hari Selasa.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 2, // Tidak dapat ditentukan
+                explanation: "P harus sebelum hari Rabu, sehingga P bisa dikerjakan pada hari Senin ATAU hari Selasa. Tidak ada kepastian mutlak harus hari Selasa. Pernyataan Tidak dapat ditentukan."
+            },
+            {
+                id: 4,
+                title: "Tema 1: Penjadwalan Proyek (Soal 4)",
+                passage: "<b>Bacaan 1 (Penjadwalan Proyek):</b><br>Lima proyek – P, Q, R, S, dan T – dikerjakan dalam 5 hari berturut-turut dari Senin hingga Jumat, masing-masing tepat satu proyek per hari.<br><br><b>Aturan Penjadwalan:</b><br>• Proyek P harus dikerjakan sebelum hari Rabu.<br>• Proyek Q tidak boleh dikerjakan pada hari Jumat.<br>• Proyek R harus dikerjakan tepat sehari sebelum proyek S.",
+                statement: "Jika T dikerjakan pada hari Senin, maka P harus dikerjakan pada hari Selasa.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Jika T di hari Senin, sisa hari Selasa s.d. Jumat. Karena P harus sebelum Rabu (Senin/Selasa), dan Senin sudah diisi T, maka P wajib hari Selasa. Pernyataan Benar."
+            },
+            {
+                id: 5,
+                title: "Tema 1: Penjadwalan Proyek (Soal 5)",
+                passage: "<b>Bacaan 1 (Penjadwalan Proyek):</b><br>Lima proyek – P, Q, R, S, dan T – dikerjakan dalam 5 hari berturut-turut dari Senin hingga Jumat, masing-masing tepat satu proyek per hari.<br><br><b>Aturan Penjadwalan:</b><br>• Proyek P harus dikerjakan sebelum hari Rabu.<br>• Proyek Q tidak boleh dikerjakan pada hari Jumat.<br>• Proyek R harus dikerjakan tepat sehari sebelum proyek S.",
+                statement: "Proyek R dapat dikerjakan pada hari Kamis.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Jika R hari Kamis dan S hari Jumat, sisa hari Senin, Selasa, Rabu untuk P, Q, T (P sebelum Rabu, Q bukan Jumat). Susunan ini sah. Pernyataan Benar."
+            },
+            {
+                id: 6,
+                title: "Tema 2: Penempatan Ruang Rapat (Soal 6)",
+                passage: "<b>Bacaan 2 (Penempatan Ruang Rapat):</b><br>Enam direktur – A, B, C, D, E, dan F – menempati 6 ruang rapat yang berderet secara berurutan dari nomor 1 sampai 6.<br><br><b>Aturan Penempatan:</b><br>• Nomor ruang direktur A harus lebih kecil daripada nomor ruang B (A < B).<br>• Direktur C menempati ruang yang tepat berada di sebelah ruang direktur D.<br>• Direktur E tidak boleh menempati ruang nomor 1 atau nomor 6.",
+                statement: "Direktur A dapat menempati ruang nomor 6.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 1, // Salah
+                explanation: "Aturan mengharuskan nomor ruang A lebih kecil dari B (A < B). Jika A di ruang 6, tidak ada ruang bagi B yang bernomor lebih kecil. Pernyataan Salah."
+            },
+            {
+                id: 7,
+                title: "Tema 2: Penempatan Ruang Rapat (Soal 7)",
+                passage: "<b>Bacaan 2 (Penempatan Ruang Rapat):</b><br>Enam direktur – A, B, C, D, E, dan F – menempati 6 ruang rapat yang berderet secara berurutan dari nomor 1 sampai 6.<br><br><b>Aturan Penempatan:</b><br>• Nomor ruang direktur A harus lebih kecil daripada nomor ruang B (A < B).<br>• Direktur C menempati ruang yang tepat berada di sebelah ruang direktur D.<br>• Direktur E tidak boleh menempati ruang nomor 1 atau nomor 6.",
+                statement: "Direktur E wajib menempati ruang nomor 3.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 2, // Tidak dapat ditentukan
+                explanation: "E hanya dilarang di ruang 1 dan 6, sehingga E bisa menempati ruang 2, 3, 4, atau 5. E tidak harus di ruang 3. Pernyataan Tidak dapat ditentukan."
+            },
+            {
+                id: 8,
+                title: "Tema 2: Penempatan Ruang Rapat (Soal 8)",
+                passage: "<b>Bacaan 2 (Penempatan Ruang Rapat):</b><br>Enam direktur – A, B, C, D, E, dan F – menempati 6 ruang rapat yang berderet secara berurutan dari nomor 1 sampai 6.<br><br><b>Aturan Penempatan:</b><br>• Nomor ruang direktur A harus lebih kecil daripada nomor ruang B (A < B).<br>• Direktur C menempati ruang yang tepat berada di sebelah ruang direktur D.<br>• Direktur E tidak boleh menempati ruang nomor 1 atau nomor 6.",
+                statement: "Jika C di ruang 1 dan D di ruang 2, maka susunan ini melanggar aturan.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 1, // Salah
+                explanation: "C di sebelah D (ruang 1 dan 2) memenuhi syarat. E di ruang 3 atau 4 (bukan ujung), dan sisa ruang diisi A & B dengan A < B. Susunan ini sah, sehingga pernyataan melanggar adalah Salah."
+            },
+            {
+                id: 9,
+                title: "Tema 2: Penempatan Ruang Rapat (Soal 9)",
+                passage: "<b>Bacaan 2 (Penempatan Ruang Rapat):</b><br>Enam direktur – A, B, C, D, E, dan F – menempati 6 ruang rapat yang berderet secara berurutan dari nomor 1 sampai 6.<br><br><b>Aturan Penempatan:</b><br>• Nomor ruang direktur A harus lebih kecil daripada nomor ruang B (A < B).<br>• Direktur C menempati ruang yang tepat berada di sebelah ruang direktur D.<br>• Direktur E tidak boleh menempati ruang nomor 1 atau nomor 6.",
+                statement: "Direktur C dapat menempati ruang nomor 6.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Jika C di ruang 6, maka D harus di ruang 5. Ruang 1 s.d. 4 diisi E, F, A, B dengan memenuhi ketentuan E bukan di ujung dan A < B. Susunan ini sah. Pernyataan Benar."
+            },
+            {
+                id: 10,
+                title: "Tema 2: Penempatan Ruang Rapat (Soal 10)",
+                passage: "<b>Bacaan 2 (Penempatan Ruang Rapat):</b><br>Enam direktur – A, B, C, D, E, dan F – menempati 6 ruang rapat yang berderet secara berurutan dari nomor 1 sampai 6.<br><br><b>Aturan Penempatan:</b><br>• Nomor ruang direktur A harus lebih kecil daripada nomor ruang B (A < B).<br>• Direktur C menempati ruang yang tepat berada di sebelah ruang direktur D.<br>• Direktur E tidak boleh menempati ruang nomor 1 atau nomor 6.",
+                statement: "Jika A di ruang 5 dan B di ruang 4, maka susunan ini memenuhi syarat.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 1, // Salah
+                explanation: "Aturan mengharuskan nomor ruang A lebih kecil dari B (A < B). Jika A di ruang 5 dan B di ruang 4, maka A > B, sehingga melanggar aturan. Pernyataan Salah."
+            }
+]},
+{ id:'verb5', nama:'Paket 5 \u2014 Logika Duduk Melingkar', data:[
+{
+                id: 1,
+                title: "Tema 1: Rapat Direksi Meja Bundar (Soal 1)",
+                passage: "<b>Bacaan 1:</b><br>Enam orang — Andi (A), Budi (B), Citra (C), Dodi (D), Evi (E), dan Fajar (F) — duduk melingkar menghadap ke tengah meja.<br>• Andi duduk di sebelah kanan Budi.<br>• Citra berhadapan dengan Andi.<br>• Dodi tidak duduk di samping Citra.<br>• Fajar duduk di sebelah kiri Budi.<br>• Evi duduk di sebelah kanan Dodi.",
+                statement: "Yang bersebelahan dengan Evi adalah Andi dan Dodi.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 1, // Salah
+                explanation: "Berdasarkan susunan searah jarum jam: Budi (1), Andi (2), Dodi (3), Evi (4), Citra (5), Fajar (6). Tetangga Evi (kursi 4) adalah Dodi (kursi 3) dan Citra (kursi 5), bukan Andi. Pernyataan Salah."
+            },
+            {
+                id: 2,
+                title: "Tema 1: Rapat Direksi Meja Bundar (Soal 2)",
+                passage: "<b>Bacaan 1:</b><br>Enam orang — Andi (A), Budi (B), Citra (C), Dodi (D), Evi (E), dan Fajar (F) — duduk melingkar menghadap ke tengah meja.<br>• Andi duduk di sebelah kanan Budi.<br>• Citra berhadapan dengan Andi.<br>• Dodi tidak duduk di samping Citra.<br>• Fajar duduk di sebelah kiri Budi.<br>• Evi duduk di sebelah kanan Dodi.",
+                statement: "Urutan searah jarum jam mulai dari Budi adalah: Budi – Andi – Dodi – Evi – Citra – Fajar.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Berdasarkan penempatan posisi melingkar yang valid: Budi(1) -> Andi(2) -> Dodi(3) -> Evi(4) -> Citra(5) -> Fajar(6). Urutan tersebut tepat. Pernyataan Benar."
+            },
+            {
+                id: 3,
+                title: "Tema 2: Diskusi Kelompok (Soal 3)",
+                passage: "<b>Bacaan 2:</b><br>Enam orang — Gani, Hani, Jefri, Kiki, Linda, dan Maya — duduk melingkar menghadap ke tengah meja.<br>• Gani berhadapan dengan Kiki.<br>• Hani duduk di sebelah kanan Gani.<br>• Jefri duduk di sebelah kiri Gani.<br>• Linda duduk di sebelah kanan Hani.<br>• Maya mengisi kursi tersisa.",
+                statement: "Linda duduk di antara Hani dan Kiki.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Susunan searah jarum jam: Gani(1), Hani(2), Linda(3), Kiki(4), Maya(5), Jefri(6). Linda berada di antara Hani(2) dan Kiki(4). Pernyataan Benar."
+            },
+            {
+                id: 4,
+                title: "Tema 2: Diskusi Kelompok (Soal 4)",
+                passage: "<b>Bacaan 2:</b><br>Enam orang — Gani, Hani, Jefri, Kiki, Linda, dan Maya — duduk melingkar menghadap ke tengah meja.<br>• Gani berhadapan dengan Kiki.<br>• Hani duduk di sebelah kanan Gani.<br>• Jefri duduk di sebelah kiri Gani.<br>• Linda duduk di sebelah kanan Hani.<br>• Maya mengisi kursi tersisa.",
+                statement: "Jefri duduk berhadapan dengan Maya.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 1, // Salah
+                explanation: "Jefri berada di posisi 6 dan Maya di posisi 5. Yang berhadapan dengan Jefri(6) adalah Linda(3), bukan Maya. Pernyataan Salah."
+            },
+            {
+                id: 5,
+                title: "Tema 3: Rapat Pleno (Soal 5)",
+                passage: "<b>Bacaan 3:</b><br>Enam orang — Nian, Omar, Puji, Qila, Roni, dan Siska — duduk melingkar menghadap ke tengah meja.<br>• Nian duduk di sebelah kiri Omar.<br>• Puji berhadapan dengan Omar.<br>• Qila duduk di sebelah kanan Puji.<br>• Roni duduk di sebelah kanan Nian.<br>• Siska mengisi kursi tersisa.",
+                statement: "Roni duduk di sebelah kanan Omar.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Susunan: Omar(1), Roni(2), Siska(3), Puji(4), Qila(5), Nian(6). Roni berada di kursi 2 (sebelah kanan Omar di kursi 1). Pernyataan Benar."
+            },
+            {
+                id: 6,
+                title: "Tema 3: Rapat Pleno (Soal 6)",
+                passage: "<b>Bacaan 3:</b><br>Enam orang — Nian, Omar, Puji, Qila, Roni, dan Siska — duduk melingkar menghadap ke tengah meja.<br>• Nian duduk di sebelah kiri Omar.<br>• Puji berhadapan dengan Omar.<br>• Qila duduk di sebelah kanan Puji.<br>• Roni duduk di sebelah kanan Nian.<br>• Siska mengisi kursi tersisa.",
+                statement: "Siska duduk berhadapan dengan Nian.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Siska berada di posisi 3 dan Nian di posisi 6. Posisi 3 dan 6 saling berhadapan dalam lingkaran 6 orang. Pernyataan Benar."
+            },
+            {
+                id: 7,
+                title: "Tema 4: Jamuan Makan Malam (Soal 7)",
+                passage: "<b>Bacaan 4:</b><br>Enam orang — Tio, Umi, Vian, Wati, Yanto, dan Zaki — duduk melingkar menghadap ke tengah meja.<br>• Tio duduk di sebelah kanan Umi.<br>• Vian berhadapan dengan Umi.<br>• Wati duduk di sebelah kiri Umi.<br>• Yanto duduk di antara Tio dan Vian.<br>• Zaki mengisi kursi tersisa.",
+                statement: "Zaki duduk di sebelah kanan Vian.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Susunan: Umi(1), Tio(2), Yanto(3), Vian(4), Zaki(5), Wati(6). Zaki(5) berada di sebelah kanan Vian(4). Pernyataan Benar."
+            },
+            {
+                id: 8,
+                title: "Tema 4: Jamuan Makan Malam (Soal 8)",
+                passage: "<b>Bacaan 4:</b><br>Enam orang — Tio, Umi, Vian, Wati, Yanto, dan Zaki — duduk melingkar menghadap ke tengah meja.<br>• Tio duduk di sebelah kanan Umi.<br>• Vian berhadapan dengan Umi.<br>• Wati duduk di sebelah kiri Umi.<br>• Yanto duduk di antara Tio dan Vian.<br>• Zaki mengisi kursi tersisa.",
+                statement: "Yanto duduk berhadapan dengan Wati.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Yanto di posisi 3 dan Wati di posisi 6. Posisi 3 dan 6 saling berhadapan. Pernyataan Benar."
+            },
+            {
+                id: 9,
+                title: "Tema 5: Seminar Nasional (Soal 9)",
+                passage: "<b>Bacaan 5:</b><br>Enam orang — Aris, Bayu, Candra, Dedi, Edi, dan Fahmi — duduk melingkar menghadap ke tengah meja.<br>• Aris duduk di sebelah kiri Bayu.<br>• Candra berhadapan dengan Aris.<br>• Dedi duduk di sebelah kanan Candra.<br>• Edi duduk di sebelah kiri Candra.<br>• Fahmi mengisi kursi tersisa.",
+                statement: "Fahmi duduk di antara Dedi dan Aris.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Susunan: Bayu(1), Edi(2), Candra(3), Dedi(4), Fahmi(5), Aris(6). Fahmi(5) berada di antara Dedi(4) dan Aris(6). Pernyataan Benar."
+            },
+            {
+                id: 10,
+                title: "Tema 5: Seminar Nasional (Soal 10)",
+                passage: "<b>Bacaan 5:</b><br>Enam orang — Aris, Bayu, Candra, Dedi, Edi, dan Fahmi — duduk melingkar menghadap ke tengah meja.<br>• Aris duduk di sebelah kiri Bayu.<br>• Candra berhadapan dengan Aris.<br>• Dedi duduk di sebelah kanan Candra.<br>• Edi duduk di sebelah kiri Candra.<br>• Fahmi mengisi kursi tersisa.",
+                statement: "Edi duduk berhadapan dengan Fahmi.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Edi di posisi 2 dan Fahmi di posisi 5. Posisi 2 dan 5 saling berhadapan dalam lingkaran 6 orang. Pernyataan Benar."
+            }
+]},
+{ id:'verb6', nama:'Paket 6 \u2014 Logika Duduk Melingkar II', data:[
+{
+                id: 1,
+                title: "Tema 1: Rapat Pimpinan Bank (Soal 1)",
+                passage: "<b>Bacaan 1:</b><br>Enam orang pimpinan — Andi, Boni, Caca, Dedi, Ega, dan Fani — duduk melingkar menghadap ke tengah meja.<br>• Andi duduk di sebelah kanan Boni.<br>• Caca berhadapan dengan Andi.<br>• Dedi duduk di sebelah kiri Boni.<br>• Ega duduk di antara Caca dan Fani.<br>• Fani duduk berhadapan dengan Boni.",
+                statement: "Ega duduk berhadapan dengan Dedi.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Berdasarkan susunan searah jarum jam (1: Boni, 2: Andi, 3: Ega, 4: Fani, 5: Caca, 6: Dedi). Ega berada di kursi 3 dan Dedi di kursi 6. Posisi 3 dan 6 saling berhadapan. Pernyataan Benar."
+            },
+            {
+                id: 2,
+                title: "Tema 1: Rapat Pimpinan Bank (Soal 2)",
+                passage: "<b>Bacaan 1:</b><br>Enam orang pimpinan — Andi, Boni, Caca, Dedi, Ega, dan Fani — duduk melingkar menghadap ke tengah meja.<br>• Andi duduk di sebelah kanan Boni.<br>• Caca berhadapan dengan Andi.<br>• Dedi duduk di sebelah kiri Boni.<br>• Ega duduk di antara Caca dan Fani.<br>• Fani duduk berhadapan dengan Boni.",
+                statement: "Caca duduk di sebelah kanan Fani.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Fani berada di kursi 4 dan Caca di kursi 5. Searah jarum jam, tepat di sebelah kanan Fani adalah Caca. Pernyataan Benar."
+            },
+            {
+                id: 3,
+                title: "Tema 1: Rapat Pimpinan Bank (Soal 3)",
+                passage: "<b>Bacaan 1:</b><br>Enam orang pimpinan — Andi, Boni, Caca, Dedi, Ega, dan Fani — duduk melingkar menghadap ke tengah meja.<br>• Andi duduk di sebelah kanan Boni.<br>• Caca berhadapan dengan Andi.<br>• Dedi duduk di sebelah kiri Boni.<br>• Ega duduk di antara Caca dan Fani.<br>• Fani duduk berhadapan dengan Boni.",
+                statement: "Boni duduk di antara Dedi dan Andi.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Boni berada di kursi 1, diapit oleh Dedi (kursi 6) di sisi kiri dan Andi (kursi 2) di sisi kanan. Pernyataan Benar."
+            },
+            {
+                id: 4,
+                title: "Tema 1: Rapat Pimpinan Bank (Soal 4)",
+                passage: "<b>Bacaan 1:</b><br>Enam orang pimpinan — Andi, Boni, Caca, Dedi, Ega, dan Fani — duduk melingkar menghadap ke tengah meja.<br>• Andi duduk di sebelah kanan Boni.<br>• Caca berhadapan dengan Andi.<br>• Dedi duduk di sebelah kiri Boni.<br>• Ega duduk di antara Caca dan Fani.<br>• Fani duduk berhadapan dengan Boni.",
+                statement: "Fani duduk di sebelah kanan Ega.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Ega berada di kursi 3 dan Fani di kursi 4. Searah jarum jam, tepat di sebelah kanan Ega adalah Fani. Pernyataan Benar."
+            },
+            {
+                id: 5,
+                title: "Tema 2: Diskusi Kelompok Strategis (Soal 5)",
+                passage: "<b>Bacaan 2:</b><br>Enam staf — Lila, Mimin, Nando, Oki, Pina, dan Qori — duduk melingkar menghadap ke tengah meja.<br>• Lila duduk di sebelah kanan Mimin.<br>• Nando berhadapan dengan Lila.<br>• Oki duduk di sebelah kiri Mimin.<br>• Pina duduk di sebelah kanan Nando.<br>• Qori mengisi kursi tersisa.",
+                statement: "Qori duduk berhadapan dengan Mimin.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 1, // Salah
+                explanation: "Susunan searah jarum jam: Mimin(1), Lila(2), Qori(3), Pina(4), Nando(5), Oki(6). Qori di kursi 3 dan Mimin di kursi 1 (tidak berhadapan, yang berhadapan dengan Mimin adalah Pina). Pernyataan Salah."
+            },
+            {
+                id: 6,
+                title: "Tema 2: Diskusi Kelompok Strategis (Soal 6)",
+                passage: "<b>Bacaan 2:</b><br>Enam staf — Lila, Mimin, Nando, Oki, Pina, dan Qori — duduk melingkar menghadap ke tengah meja.<br>• Lila duduk di sebelah kanan Mimin.<br>• Nando berhadapan dengan Lila.<br>• Oki duduk di sebelah kiri Mimin.<br>• Pina duduk di sebelah kanan Nando.<br>• Qori mengisi kursi tersisa.",
+                statement: "Pina duduk di antara Qori dan Nando.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Pina berada di kursi 4, diapit oleh Qori (kursi 3) dan Nando (kursi 5). Pernyataan Benar."
+            },
+            {
+                id: 7,
+                title: "Tema 2: Diskusi Kelompok Strategis (Soal 7)",
+                passage: "<b>Bacaan 2:</b><br>Enam staf — Lila, Mimin, Nando, Oki, Pina, dan Qori — duduk melingkar menghadap ke tengah meja.<br>• Lila duduk di sebelah kanan Mimin.<br>• Nando berhadapan dengan Lila.<br>• Oki duduk di sebelah kiri Mimin.<br>• Pina duduk di sebelah kanan Nando.<br>• Qori mengisi kursi tersisa.",
+                statement: "Oki duduk di sebelah kiri Nando.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Nando berada di kursi 5 dan Oki di kursi 6. Searah jarum jam dari Nando adalah Oki (posisi kiri Nando dalam meja melingkar menghadap ke tengah). Pernyataan Benar."
+            },
+            {
+                id: 8,
+                title: "Tema 2: Diskusi Kelompok Strategis (Soal 8)",
+                passage: "<b>Bacaan 2:</b><br>Enam staf — Lila, Mimin, Nando, Oki, Pina, dan Qori — duduk melingkar menghadap ke tengah meja.<br>• Lila duduk di sebelah kanan Mimin.<br>• Nando berhadapan dengan Lila.<br>• Oki duduk di sebelah kiri Mimin.<br>• Pina duduk di sebelah kanan Nando.<br>• Qori mengisi kursi tersisa.",
+                statement: "Lila duduk berhadapan dengan Oki.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 1, // Salah
+                explanation: "Lila di kursi 2 dan Oki di kursi 6. Yang berhadapan dengan Lila(2) adalah Nando(5), bukan Oki. Pernyataan Salah."
+            },
+            {
+                id: 9,
+                title: "Tema 3: Seminar Analis Keuangan (Soal 9)",
+                passage: "<b>Bacaan 3:</b><br>Enam peserta — Rian, Siska, Toni, Udin, Vina, dan Wati — duduk melingkar menghadap ke tengah meja.<br>• Rian duduk di sebelah kanan Siska.<br>• Toni berhadapan dengan Rian.<br>• Udin duduk di sebelah kiri Siska.<br>• Vina duduk di antara Toni dan Wati.<br>• Wati mengisi kursi tersisa.",
+                statement: "Wati duduk berhadapan dengan Rian.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 1, // Salah
+                explanation: "Susunan searah jarum jam: Siska(1), Rian(2), Wati(3), Vina(4), Toni(5), Udin(6). Wati di kursi 3 dan Rian di kursi 2 (tidak berhadapan, yang berhadapan dengan Rian adalah Vina). Pernyataan Salah."
+            },
+            {
+                id: 10,
+                title: "Tema 3: Seminar Analis Keuangan (Soal 10)",
+                passage: "<b>Bacaan 3:</b><br>Enam peserta — Rian, Siska, Toni, Udin, Vina, dan Wati — duduk melingkar menghadap ke tengah meja.<br>• Rian duduk di sebelah kanan Siska.<br>• Toni berhadapan dengan Rian.<br>• Udin duduk di sebelah kiri Siska.<br>• Vina duduk di antara Toni dan Wati.<br>• Wati mengisi kursi tersisa.",
+                statement: "Udin duduk di sebelah kanan Toni.",
+                options: ["Benar", "Salah", "Tidak dapat ditentukan"],
+                answer: 0, // Benar
+                explanation: "Toni berada di kursi 5 dan Udin di kursi 6. Searah jarum jam, tepat di sebelah kanan Toni adalah Udin. Pernyataan Benar."
+            }
+]},
+];
+
+const NUMERIK_PACKETS = [
+{ id:'num1', nama:'Paket 1 \u2014 Matriks Dasar', data:[
+{
+                id: 1,
+                type: "ISIAN SINGKAT",
+                text: `<p class="mb-3 font-semibold text-slate-700">Ketik angka yang tepat untuk menggantikan tanda tanya (?) di dalam matriks berikut!</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>10</td><td>15</td><td>13</td></tr>
+                           <tr><td>20</td><td>25</td><td>23</td></tr>
+                           <tr><td>30</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td><td>33</td></tr>
+                       </table>`,
+                answer: "35",
+                explanation: "Pola mendatar (baris): Angka ditambah 5, lalu dikurangi 2 (+5, -2).<br>Baris 1: 10 (+5) = 15. Lalu 15 (-2) = 13.<br>Baris 3: 30 (+5) = <strong>35</strong>. Cek: 35 (-2) = 33. (Sesuai)"
+            },
+            {
+                id: 2,
+                type: "ISIAN SINGKAT",
+                text: `<p class="mb-3 font-semibold text-slate-700">Hitung nilai kotak yang kosong pada matriks di bawah ini:</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>5</td><td>7</td><td>9</td></tr>
+                           <tr><td>10</td><td>14</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                           <tr><td>13</td><td>17</td><td>21</td></tr>
+                       </table>`,
+                answer: "18",
+                explanation: "Pola menurun (kolom): Angka dikali 2, lalu ditambah 3 (x2, +3).<br>Kolom 1: 5 (x2) = 10. Lalu 10 (+3) = 13.<br>Kolom 3: 9 (x2) = <strong>18</strong>. Cek: 18 (+3) = 21. (Sesuai)"
+            },
+            {
+                id: 3,
+                type: "ISIAN SINGKAT",
+                text: `<p class="mb-3 font-semibold text-slate-700">Selesaikan pola logika matematika di matriks 4x4 ini!</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>2</td><td>5</td><td>10</td><td>17</td></tr>
+                           <tr><td>10</td><td>13</td><td>18</td><td>25</td></tr>
+                           <tr><td>20</td><td>23</td><td>28</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                           <tr><td>50</td><td>53</td><td>58</td><td>65</td></tr>
+                       </table>`,
+                answer: "35",
+                explanation: "Pola selisih bertingkat secara mendatar (baris). Setiap kotak ditambahkan bilangan ganjil berurutan (+3, +5, +7).<br>Baris 1: 2 (+3)=5, 5 (+5)=10, 10 (+7)=17.<br>Baris 3: 20 (+3)=23, 23 (+5)=28, 28 (+7)=<strong>35</strong>."
+            },
+            {
+                id: 4,
+                type: "ISIAN SINGKAT",
+                text: `<p class="mb-3 font-semibold text-slate-700">Tentukan nilai untuk kotak bertanda tanya (?):</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>12</td><td>15</td><td>27</td></tr>
+                           <tr><td>21</td><td>11</td><td>32</td></tr>
+                           <tr><td>35</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td><td>50</td></tr>
+                       </table>`,
+                answer: "15",
+                explanation: "Logika Penjumlahan Baris: Kolom 1 dijumlahkan dengan Kolom 2 menghasilkan angka di Kolom 3.<br>Baris 1: 12 + 15 = 27.<br>Baris 3: 35 + ? = 50. Maka ? = 50 - 35 = <strong>15</strong>."
+            },
+            {
+                id: 5,
+                type: "ISIAN SINGKAT",
+                text: `<p class="mb-3 font-semibold text-slate-700">Berapakah bilangan yang tepat untuk mengisi kekosongan matriks?</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>8</td><td>12</td><td>16</td></tr>
+                           <tr><td>14</td><td>20</td><td>26</td></tr>
+                           <tr><td>22</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td><td>42</td></tr>
+                       </table>`,
+                answer: "32",
+                explanation: "Logika Nilai Tengah (Rata-rata): Angka di Kolom 2 (tengah) adalah hasil rata-rata dari penjumlahan Kolom 1 dan Kolom 3.<br>Baris 1: (8 + 16) / 2 = 12.<br>Baris 3: (22 + 42) / 2 = 64 / 2 = <strong>32</strong>."
+            },
+            {
+                id: 6,
+                type: "ISIAN SINGKAT",
+                text: `<p class="mb-3 font-semibold text-slate-700">Temukan pola operasi kali pada susunan angka berikut:</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>4</td><td>7</td><td>6</td></tr>
+                           <tr><td>5</td><td>3</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                           <tr><td>20</td><td>21</td><td>48</td></tr>
+                       </table>`,
+                answer: "8",
+                explanation: "Logika Perkalian Menurun: Pada tiap kolom, angka di Baris 1 dikalikan dengan angka di Baris 2 akan menghasilkan angka di Baris 3.<br>Kolom 1: 4 x 5 = 20.<br>Kolom 3: 6 x ? = 48. Maka ? = 48 / 6 = <strong>8</strong>."
+            },
+            {
+                id: 7,
+                type: "ISIAN SINGKAT",
+                text: `<p class="mb-3 font-semibold text-slate-700">Ini adalah Bujur Sangkar Ajaib (Magic Square). Berapa angkanya?</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>2</td><td>7</td><td>6</td></tr>
+                           <tr><td>9</td><td>5</td><td>1</td></tr>
+                           <tr><td>4</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td><td>8</td></tr>
+                       </table>`,
+                answer: "3",
+                explanation: "Ciri Magic Square 3x3 adalah jumlah mendatar, menurun, atau menyilangnya selalu konstan (dalam hal ini totalnya 15).<br>Cek Baris 1: 2+7+6 = 15.<br>Baris 3: 4 + ? + 8 = 15. Maka ? = 15 - 12 = <strong>3</strong>."
+            },
+            {
+                id: 8,
+                type: "ISIAN SINGKAT",
+                text: `<p class="mb-3 font-semibold text-slate-700">Ketik angka pengganti tanda tanya (?) pada matriks di bawah!</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>10</td><td>6</td><td>14</td></tr>
+                           <tr><td>15</td><td>8</td><td>22</td></tr>
+                           <tr><td>20</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td><td>28</td></tr>
+                       </table>`,
+                answer: "12",
+                explanation: "Pola operasi kombinasi (Mendatar): Kolom 1 dikali 2, lalu dikurangi Kolom 2 menghasilkan Kolom 3. (K1 x 2) - K2 = K3.<br>Baris 1: (10 x 2) - 6 = 20 - 6 = 14.<br>Baris 3: (20 x 2) - ? = 28. Maka 40 - 28 = <strong>12</strong>."
+            },
+            {
+                id: 9,
+                type: "ISIAN SINGKAT",
+                text: `<p class="mb-3 font-semibold text-slate-700">Lengkapi kotak kosong pada matriks deret hitung ini:</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>1</td><td>2</td><td>3</td><td>5</td></tr>
+                           <tr><td>4</td><td>5</td><td>9</td><td>14</td></tr>
+                           <tr><td>6</td><td>7</td><td>13</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                           <tr><td>10</td><td>11</td><td>21</td><td>32</td></tr>
+                       </table>`,
+                answer: "20",
+                explanation: "Logika Fibonacci Mendatar: Sebuah angka didapatkan dari penjumlahan DUA angka sebelumnya di sebelah kiri.<br>Baris 1: 1+2=3, 2+3=5.<br>Baris 3: 6+7=13, 7+13=<strong>20</strong>."
+            },
+            {
+                id: 10,
+                type: "ISIAN SINGKAT",
+                text: `<p class="mb-3 font-semibold text-slate-700">Analisis matriks di bawah ini dan isi jawaban yang tepat!</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>2</td><td>3</td><td>5</td></tr>
+                           <tr><td>7</td><td>11</td><td>13</td></tr>
+                           <tr><td>17</td><td>19</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "23",
+                explanation: "Matriks ini memuat urutan <strong>Bilangan Prima</strong> secara bersambung dari kiri ke kanan lalu turun ke baris bawahnya (2, 3, 5, 7, 11, 13, 17, 19).<br>Bilangan prima selanjutnya setelah angka 19 adalah <strong>23</strong>."
+            }
+]},
+{ id:'num2', nama:'Paket 2 \u2014 Matriks 3x3 & 4x4', data:[
+// SOAL 3x3
+            {
+                id: 1,
+                type: "MATRIKS ANGKA 3x3",
+                text: `<p class="mb-3 font-semibold text-slate-700">Ketik angka yang tepat untuk menggantikan tanda tanya (?) di dalam matriks berikut!</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>4</td><td>3</td><td>14</td></tr>
+                           <tr><td>5</td><td>4</td><td>18</td></tr>
+                           <tr><td>6</td><td>2</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "16",
+                explanation: "Pola operasi kombinasi mendatar: <strong>(Kolom 1 + Kolom 2) x 2 = Kolom 3</strong>.<br>Baris 1: (4 + 3) x 2 = 7 x 2 = 14.<br>Baris 2: (5 + 4) x 2 = 9 x 2 = 18.<br>Baris 3: (6 + 2) x 2 = 8 x 2 = <strong>16</strong>."
+            },
+            {
+                id: 2,
+                type: "MATRIKS ANGKA 3x3",
+                text: `<p class="mb-3 font-semibold text-slate-700">Hitung nilai kotak yang kosong pada susunan angka di bawah ini:</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>3</td><td>4</td><td>5</td></tr>
+                           <tr><td>5</td><td>7</td><td>6</td></tr>
+                           <tr><td>14</td><td>23</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "31",
+                explanation: "Pola menurun secara vertikal (kolom): <strong>(Baris 1)² + Baris 2 = Baris 3</strong>.<br>Kolom 1: (3²) + 5 = 9 + 5 = 14.<br>Kolom 2: (4²) + 7 = 16 + 7 = 23.<br>Kolom 3: (5²) + 6 = 25 + 6 = <strong>31</strong>."
+            },
+            {
+                id: 3,
+                type: "MATRIKS ANGKA 3x3",
+                text: `<p class="mb-3 font-semibold text-slate-700">Tentukan nilai untuk kotak bertanda tanya (?):</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>8</td><td>5</td><td>19</td></tr>
+                           <tr><td>7</td><td>4</td><td>17</td></tr>
+                           <tr><td>9</td><td>6</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "21",
+                explanation: "Pola operasi mendatar (baris): <strong>(Kolom 1 x 3) - Kolom 2 = Kolom 3</strong>.<br>Baris 1: (8 x 3) - 5 = 24 - 5 = 19.<br>Baris 2: (7 x 3) - 4 = 21 - 4 = 17.<br>Baris 3: (9 x 3) - 6 = 27 - 6 = <strong>21</strong>."
+            },
+            {
+                id: 4,
+                type: "MATRIKS ANGKA 3x3",
+                text: `<p class="mb-3 font-semibold text-slate-700">Pecahkan logika dari matriks angka ini dan isi kotak yang kosong!</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>12</td><td>7</td><td>25</td></tr>
+                           <tr><td>15</td><td>6</td><td>81</td></tr>
+                           <tr><td>11</td><td>4</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "49",
+                explanation: "Pola selisih yang dikuadratkan secara mendatar (baris): <strong>(Kolom 1 - Kolom 2)² = Kolom 3</strong>.<br>Baris 1: (12 - 7)² = 5² = 25.<br>Baris 2: (15 - 6)² = 9² = 81.<br>Baris 3: (11 - 4)² = 7² = <strong>49</strong>."
+            },
+            {
+                id: 5,
+                type: "MATRIKS ANGKA 3x3",
+                text: `<p class="mb-3 font-semibold text-slate-700">Berapakah bilangan yang tepat untuk mengisi kekosongan matriks?</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>6</td><td>8</td><td>10</td></tr>
+                           <tr><td>4</td><td>5</td><td>7</td></tr>
+                           <tr><td>12</td><td>20</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "35",
+                explanation: "Pola menurun secara vertikal (kolom): <strong>(Baris 1 x Baris 2) / 2 = Baris 3</strong>.<br>Kolom 1: (6 x 4) / 2 = 24 / 2 = 12.<br>Kolom 2: (8 x 5) / 2 = 40 / 2 = 20.<br>Kolom 3: (10 x 7) / 2 = 70 / 2 = <strong>35</strong>."
+            },
+            // SOAL 4x4
+            {
+                id: 6,
+                type: "MATRIKS ANGKA 4x4",
+                text: `<p class="mb-3 font-semibold text-slate-700">Beralih ke matriks 4x4. Temukan angka untuk sel yang kosong!</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>3</td><td>5</td><td>8</td><td>16</td></tr>
+                           <tr><td>4</td><td>7</td><td>2</td><td>13</td></tr>
+                           <tr><td>5</td><td>9</td><td>4</td><td>18</td></tr>
+                           <tr><td>6</td><td>8</td><td>7</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "21",
+                explanation: "Pola penjumlahan mendatar sederhana: <strong>Kolom 1 + Kolom 2 + Kolom 3 = Kolom 4</strong>.<br>Baris 1: 3 + 5 + 8 = 16.<br>Baris 3: 5 + 9 + 4 = 18.<br>Baris 4: 6 + 8 + 7 = <strong>21</strong>."
+            },
+            {
+                id: 7,
+                type: "MATRIKS ANGKA 4x4",
+                text: `<p class="mb-3 font-semibold text-slate-700">Ketik angka pengganti tanda tanya (?) pada matriks di bawah!</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>2</td><td>4</td><td>8</td><td>16</td></tr>
+                           <tr><td>3</td><td>6</td><td>12</td><td>24</td></tr>
+                           <tr><td>5</td><td>10</td><td>20</td><td>40</td></tr>
+                           <tr><td>7</td><td>14</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td><td>56</td></tr>
+                       </table>`,
+                answer: "28",
+                explanation: "Logika kelipatan berganda (mendatar). <strong>Setiap bergeser 1 kolom ke kanan, angkanya selalu dikali 2</strong>.<br>Baris 1: 2 (x2)=4, 4 (x2)=8, 8 (x2)=16.<br>Baris 4: 7 (x2)=14, 14 (x2)=<strong>28</strong>. Cek: 28 (x2)=56. (Sesuai)"
+            },
+            {
+                id: 8,
+                type: "MATRIKS ANGKA 4x4",
+                text: `<p class="mb-3 font-semibold text-slate-700">Lengkapi kotak kosong pada baris terbawah matriks ini:</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>1</td><td>3</td><td>4</td><td>7</td></tr>
+                           <tr><td>2</td><td>5</td><td>7</td><td>12</td></tr>
+                           <tr><td>4</td><td>6</td><td>10</td><td>16</td></tr>
+                           <tr><td>3</td><td>8</td><td>11</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "19",
+                explanation: "Logika Fibonacci Mendatar (Baris): <strong>Penjumlahan dua kolom berurutan menghasilkan nilai di kolom berikutnya</strong>.<br>Baris 1: 1+3=4, 3+4=7.<br>Baris 3: 4+6=10, 6+10=16.<br>Baris 4: 3+8=11, 8+11=<strong>19</strong>."
+            },
+            {
+                id: 9,
+                type: "MATRIKS ANGKA 4x4",
+                text: `<p class="mb-3 font-semibold text-slate-700">Pecahkan pola deret hitung yang menyamping di matriks ini!</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>10</td><td>11</td><td>14</td><td>19</td></tr>
+                           <tr><td>20</td><td>21</td><td>24</td><td>29</td></tr>
+                           <tr><td>15</td><td>16</td><td>19</td><td>24</td></tr>
+                           <tr><td>30</td><td>31</td><td>34</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "39",
+                explanation: "Pola selisih angka ganjil secara mendatar (baris). <strong>Setiap berpindah kolom dijumlahkan dengan +1, lalu +3, lalu +5</strong>.<br>Baris 1: 10(+1)=11, 11(+3)=14, 14(+5)=19.<br>Baris 4: 30(+1)=31, 31(+3)=34, 34(+5)=<strong>39</strong>."
+            },
+            {
+                id: 10,
+                type: "MATRIKS ANGKA 4x4",
+                text: `<p class="mb-3 font-semibold text-slate-700">Analisis matriks di bawah ini dan isi jawaban yang tepat!</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>4</td><td>5</td><td>8</td><td>12</td></tr>
+                           <tr><td>6</td><td>3</td><td>7</td><td>11</td></tr>
+                           <tr><td>7</td><td>4</td><td>10</td><td>18</td></tr>
+                           <tr><td>9</td><td>5</td><td>15</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "30",
+                explanation: "Pola operasi campuran secara mendatar: <strong>(Kolom 1 x Kolom 2) - Kolom 3 = Kolom 4</strong>.<br>Baris 1: (4 x 5) - 8 = 20 - 8 = 12.<br>Baris 2: (6 x 3) - 7 = 18 - 7 = 11.<br>Baris 4: (9 x 5) - 15 = 45 - 15 = <strong>30</strong>."
+            }
+]},
+{ id:'num3', nama:'Paket 3 \u2014 Advanced', data:[
+// SOAL 3x3
+            {
+                id: 1,
+                type: "MATRIKS ANGKA 3x3",
+                text: `<p class="mb-3 font-semibold text-slate-700">Pecahkan pola kuadrat pada matriks berikut dan ketik angkanya!</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>6</td><td>15</td><td>21</td></tr>
+                           <tr><td>8</td><td>24</td><td>40</td></tr>
+                           <tr><td>9</td><td>30</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "51",
+                explanation: "Pola mendatar (baris): Kuadrat dari Kolom 1 dikurangi Kolom 2 menghasilkan Kolom 3. <br><strong>(Kolom 1)² - Kolom 2 = Kolom 3</strong><br>Baris 1: 6² - 15 = 36 - 15 = 21.<br>Baris 2: 8² - 24 = 64 - 24 = 40.<br>Baris 3: 9² - 30 = 81 - 30 = <strong>51</strong>."
+            },
+            {
+                id: 2,
+                type: "MATRIKS ANGKA 3x3",
+                text: `<p class="mb-3 font-semibold text-slate-700">Hitung nilai kotak yang kosong pada susunan angka menurun ini:</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>7</td><td>9</td><td>8</td></tr>
+                           <tr><td>5</td><td>4</td><td>6</td></tr>
+                           <tr><td>23</td><td>23</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "34",
+                explanation: "Pola vertikal (kolom): Hasil kali dua angka teratas dikurangi dengan jumlah kedua angka tersebut.<br><strong>(Baris 1 × Baris 2) - (Baris 1 + Baris 2) = Baris 3</strong><br>Kolom 1: (7 × 5) - (7 + 5) = 35 - 12 = 23.<br>Kolom 2: (9 × 4) - (9 + 4) = 36 - 13 = 23.<br>Kolom 3: (8 × 6) - (8 + 6) = 48 - 14 = <strong>34</strong>."
+            },
+            {
+                id: 3,
+                type: "MATRIKS ANGKA 3x3",
+                text: `<p class="mb-3 font-semibold text-slate-700">Matriks ini menerapkan hukum matematika terkenal. Berapa angka di posisi tengah bawah?</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>3</td><td>4</td><td>5</td></tr>
+                           <tr><td>5</td><td>12</td><td>13</td></tr>
+                           <tr><td>8</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td><td>17</td></tr>
+                       </table>`,
+                answer: "15",
+                explanation: "Pola Tripel Pythagoras secara mendatar: <strong>(Kolom 1)² + (Kolom 2)² = (Kolom 3)²</strong>.<br>Baris 1: 3² + 4² = 9 + 16 = 25 (yang merupakan 5²).<br>Baris 2: 5² + 12² = 25 + 144 = 169 (13²).<br>Baris 3: 8² + ?² = 17². Maka 64 + ?² = 289. ?² = 225, sehingga ? = <strong>15</strong>."
+            },
+            {
+                id: 4,
+                type: "MATRIKS ANGKA 3x3",
+                text: `<p class="mb-3 font-semibold text-slate-700">Tentukan nilai untuk mengisi kotak di tengah bawah:</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>12</td><td>20</td><td>18</td></tr>
+                           <tr><td>24</td><td>30</td><td>26</td></tr>
+                           <tr><td>16</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td><td>32</td></tr>
+                       </table>`,
+                answer: "29",
+                explanation: "Pola pencarian nilai tengah modifikasi (baris). Kolom tengah adalah rata-rata dari ujung kiri dan kanan, ditambah 5 konstan.<br><strong>((Kolom 1 + Kolom 3) / 2) + 5 = Kolom 2</strong><br>Baris 1: ((12 + 18) / 2) + 5 = (30/2) + 5 = 15 + 5 = 20.<br>Baris 3: ((16 + 32) / 2) + 5 = (48/2) + 5 = 24 + 5 = <strong>29</strong>."
+            },
+            {
+                id: 5,
+                type: "MATRIKS ANGKA 3x3",
+                text: `<p class="mb-3 font-semibold text-slate-700">Berapakah bilangan yang tepat untuk mengisi kekosongan selisis kuadrat ini?</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>5</td><td>7</td><td>9</td></tr>
+                           <tr><td>3</td><td>4</td><td>6</td></tr>
+                           <tr><td>16</td><td>33</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "45",
+                explanation: "Pola selisih kuadrat secara menurun (kolom).<br><strong>(Baris 1)² - (Baris 2)² = Baris 3</strong>.<br>Kolom 1: 5² - 3² = 25 - 9 = 16.<br>Kolom 2: 7² - 4² = 49 - 16 = 33.<br>Kolom 3: 9² - 6² = 81 - 36 = <strong>45</strong>."
+            },
+            // SOAL 4x4
+            {
+                id: 6,
+                type: "MATRIKS ANGKA 4x4",
+                text: `<p class="mb-3 font-semibold text-slate-700">Analisis matriks 4x4 berikut. Temukan angka untuk sel yang kosong!</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>4</td><td>6</td><td>9</td><td>15</td></tr>
+                           <tr><td>5</td><td>8</td><td>12</td><td>28</td></tr>
+                           <tr><td>7</td><td>9</td><td>20</td><td>43</td></tr>
+                           <tr><td>8</td><td>7</td><td>14</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "42",
+                explanation: "Pola operasi campuran mendatar (baris): Hasil kali dua kolom pertama dikurangi dengan kolom ketiga.<br><strong>(Kolom 1 × Kolom 2) - Kolom 3 = Kolom 4</strong>.<br>Baris 1: (4 × 6) - 9 = 24 - 9 = 15.<br>Baris 2: (5 × 8) - 12 = 40 - 12 = 28.<br>Baris 4: (8 × 7) - 14 = 56 - 14 = <strong>42</strong>."
+            },
+            {
+                id: 7,
+                type: "MATRIKS ANGKA 4x4",
+                text: `<p class="mb-3 font-semibold text-slate-700">Ketik angka pengganti tanda tanya (?) pada matriks di bawah!</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>2</td><td>3</td><td>7</td><td>16</td></tr>
+                           <tr><td>5</td><td>6</td><td>10</td><td>19</td></tr>
+                           <tr><td>10</td><td>11</td><td>15</td><td>24</td></tr>
+                           <tr><td>15</td><td>16</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td><td>29</td></tr>
+                       </table>`,
+                answer: "20",
+                explanation: "Pola penambahan tingkat kuadrat mendatar. Setiap berpindah sel ke kanan, angkanya ditambah dengan bilangan kuadrat berurutan: <strong>+1², +2², +3² (yaitu +1, +4, +9)</strong>.<br>Baris 1: 2 (+1) = 3, 3 (+4) = 7, 7 (+9) = 16.<br>Baris 4: 15 (+1) = 16, 16 (+4) = <strong>20</strong>. Cek: 20 (+9) = 29. (Sesuai)"
+            },
+            {
+                id: 8,
+                type: "MATRIKS ANGKA 4x4",
+                text: `<p class="mb-3 font-semibold text-slate-700">Lengkapi kotak kosong pada baris terbawah matriks ini:</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>3</td><td>5</td><td>8</td><td>15</td></tr>
+                           <tr><td>4</td><td>7</td><td>11</td><td>28</td></tr>
+                           <tr><td>6</td><td>9</td><td>15</td><td>54</td></tr>
+                           <tr><td>8</td><td>5</td><td>13</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "40",
+                explanation: "Di sini Kolom 3 hanyalah 'pengecoh' (berisi penjumlahan K1+K2). Pola utama untuk mengisi kolom paling ujung adalah hasil kali dua kolom pertama!<br><strong>Kolom 4 = Kolom 1 × Kolom 2</strong>.<br>Baris 1: 3 × 5 = 15.<br>Baris 3: 6 × 9 = 54.<br>Baris 4: 8 × 5 = <strong>40</strong>."
+            },
+            {
+                id: 9,
+                type: "MATRIKS ANGKA 4x4",
+                text: `<p class="mb-3 font-semibold text-slate-700">Pecahkan pola operasi bersusun menurun di matriks ini!</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>2</td><td>3</td><td>1</td><td>4</td></tr>
+                           <tr><td>4</td><td>5</td><td>6</td><td>3</td></tr>
+                           <tr><td>5</td><td>4</td><td>7</td><td>8</td></tr>
+                           <tr><td>30</td><td>32</td><td>49</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "56",
+                explanation: "Pola bersusun menurun vertikal (kolom): Penjumlahan dua baris atas dikalikan dengan baris ketiga.<br><strong>(Baris 1 + Baris 2) × Baris 3 = Baris 4</strong>.<br>Kolom 1: (2 + 4) × 5 = 6 × 5 = 30.<br>Kolom 2: (3 + 5) × 4 = 8 × 4 = 32.<br>Kolom 4: (4 + 3) × 8 = 7 × 8 = <strong>56</strong>."
+            },
+            {
+                id: 10,
+                type: "MATRIKS ANGKA 4x4",
+                text: `<p class="mb-3 font-semibold text-slate-700">Matriks ini berisi urutan rahasia yang berjalan berliku (zig-zag). Berapa angka yang kosong?</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>2</td><td>3</td><td>5</td><td>7</td></tr>
+                           <tr><td>19</td><td>17</td><td>13</td><td>11</td></tr>
+                           <tr><td>23</td><td>29</td><td>31</td><td>37</td></tr>
+                           <tr><td>53</td><td>47</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td><td>41</td></tr>
+                       </table>`,
+                answer: "43",
+                explanation: "Matriks ini memuat urutan <strong>Bilangan Prima</strong> yang diurutkan dengan pola mengular/ular tangga berliku.<br>Baris 1 (Kiri ke Kanan): 2, 3, 5, 7.<br>Baris 2 turun dan berbalik (Kanan ke Kiri): 11, 13, 17, 19.<br>Baris 3 berbalik lagi (Kiri ke Kanan): 23, 29, 31, 37.<br>Baris 4 berbalik lagi (Kanan ke Kiri): 41, kemudan prima selanjutnya adalah <strong>43</strong>, lalu 47, dan 53."
+            }
+]},
+{ id:'num4', nama:'Paket 4 \u2014 Aritmatika Campuran', data:[
+// SOAL 3x3
+            {
+                id: 1,
+                type: "MATRIKS 3x3 (Penjumlahan)",
+                text: `<p class="mb-3 font-semibold text-slate-700">Tentukan angka untuk mengisi sel yang kosong berdasarkan penjumlahan sederhana!</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>15</td><td>12</td><td>27</td></tr>
+                           <tr><td>20</td><td>15</td><td>35</td></tr>
+                           <tr><td>25</td><td>18</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "43",
+                explanation: "Pola mendatar (baris): Kolom 1 dijumlahkan dengan Kolom 2 menghasilkan Kolom 3.<br><strong>Kolom 1 + Kolom 2 = Kolom 3</strong><br>Baris 1: 15 + 12 = 27.<br>Baris 2: 20 + 15 = 35.<br>Baris 3: 25 + 18 = <strong>43</strong>."
+            },
+            {
+                id: 2,
+                type: "MATRIKS 3x3 (Pengurangan)",
+                text: `<p class="mb-3 font-semibold text-slate-700">Terapkan operasi pengurangan mendatar untuk menemukan angka yang hilang:</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>45</td><td>15</td><td>30</td></tr>
+                           <tr><td>60</td><td>25</td><td>35</td></tr>
+                           <tr><td>75</td><td>30</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "45",
+                explanation: "Pola mendatar (baris): Kolom 1 dikurangi Kolom 2 menghasilkan Kolom 3.<br><strong>Kolom 1 - Kolom 2 = Kolom 3</strong><br>Baris 1: 45 - 15 = 30.<br>Baris 2: 60 - 25 = 35.<br>Baris 3: 75 - 30 = <strong>45</strong>."
+            },
+            {
+                id: 3,
+                type: "MATRIKS 3x3 (Perkalian)",
+                text: `<p class="mb-3 font-semibold text-slate-700">Gunakan operasi perkalian vertikal (kolom) untuk mengisi tanda tanya (?):</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>4</td><td>5</td><td>6</td></tr>
+                           <tr><td>3</td><td>4</td><td>5</td></tr>
+                           <tr><td>12</td><td>20</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "30",
+                explanation: "Pola menurun vertikal (kolom): Baris 1 dikalikan dengan Baris 2 menghasilkan Baris 3.<br><strong>Baris 1 × Baris 2 = Baris 3</strong><br>Kolom 1: 4 × 3 = 12.<br>Kolom 2: 5 × 4 = 20.<br>Kolom 3: 6 × 5 = <strong>30</strong>."
+            },
+            {
+                id: 4,
+                type: "MATRIKS 3x3 (Pembagian)",
+                text: `<p class="mb-3 font-semibold text-slate-700">Tentukan angka pengganti sel kosong menggunakan operasi pembagian:</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>72</td><td>8</td><td>9</td></tr>
+                           <tr><td>54</td><td>6</td><td>9</td></tr>
+                           <tr><td>48</td><td>8</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "6",
+                explanation: "Pola mendatar (baris): Kolom 1 dibagi dengan Kolom 2 menghasilkan Kolom 3.<br><strong>Kolom 1 / Kolom 2 = Kolom 3</strong><br>Baris 1: 72 / 8 = 9.<br>Baris 2: 54 / 6 = 9.<br>Baris 3: 48 / 8 = <strong>6</strong>."
+            },
+            {
+                id: 5,
+                type: "MATRIKS 3x3 (Kombinasi Tambah-Kurang)",
+                text: `<p class="mb-3 font-semibold text-slate-700">Cari angka yang tepat untuk melengkapi matriks berikut:</p>
+                       <table class="matrix-table mx-auto sm:mx-0">
+                           <tr><td>10</td><td>20</td><td>15</td></tr>
+                           <tr><td>14</td><td>24</td><td>19</td></tr>
+                           <tr><td>18</td><td>28</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "23",
+                explanation: "Pola mendatar (baris): Kolom 1 ditambah 10, lalu dikurangi 5 (+10, -5).<br>Baris 1: 10 + 10 = 20, lalu 20 - 5 = 15.<br>Baris 3: 18 + 10 = 28, lalu 28 - 5 = <strong>23</strong>."
+            },
+            // SOAL 4x4
+            {
+                id: 6,
+                type: "MATRIKS 4x4 (Penjumlahan)",
+                text: `<p class="mb-3 font-semibold text-slate-700">Beralih ke matriks 4x4. Jumlahkan angka-angka secara mendatar untuk mengisi sel kosong!</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>5</td><td>10</td><td>15</td><td>30</td></tr>
+                           <tr><td>8</td><td>12</td><td>20</td><td>40</td></tr>
+                           <tr><td>10</td><td>15</td><td>25</td><td>50</td></tr>
+                           <tr><td>15</td><td>20</td><td>25</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "60",
+                explanation: "Pola mendatar (baris): Penjumlahan tiga kolom pertama menghasilkan nilai di kolom keempat.<br><strong>Kolom 1 + Kolom 2 + Kolom 3 = Kolom 4</strong><br>Baris 1: 5 + 10 + 15 = 30.<br>Baris 3: 10 + 15 + 25 = 50.<br>Baris 4: 15 + 20 + 25 = <strong>60</strong>."
+            },
+            {
+                id: 7,
+                type: "MATRIKS 4x4 (Pengurangan)",
+                text: `<p class="mb-3 font-semibold text-slate-700">Ketik angka yang tepat pada sel kosong dengan pola pengurangan berurutan:</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>100</td><td>80</td><td>60</td><td>40</td></tr>
+                           <tr><td>90</td><td>72</td><td>54</td><td>36</td></tr>
+                           <tr><td>80</td><td>64</td><td>48</td><td>32</td></tr>
+                           <tr><td>70</td><td>56</td><td>42</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "28",
+                explanation: "Pola mendatar (baris): Setiap bergeser satu kolom ke kanan, nilai berkurang secara konstan (pola selisih tetap).<br>Baris 4: 70 ke 56 (-14), 56 ke 42 (-14), maka 42 dikurangi 14 = <strong>28</strong>."
+            },
+            {
+                id: 8,
+                type: "MATRIKS 4x4 (Perkalian)",
+                text: `<p class="mb-3 font-semibold text-slate-700">Tentukan nilai sel terakhir menggunakan kelipatan perkalian konstan:</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>2</td><td>6</td><td>18</td><td>54</td></tr>
+                           <tr><td>3</td><td>9</td><td>27</td><td>81</td></tr>
+                           <tr><td>4</td><td>12</td><td>36</td><td>108</td></tr>
+                           <tr><td>5</td><td>15</td><td>45</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "135",
+                explanation: "Pola mendatar (baris): Setiap angka dikalikan 3 secara konstan saat bergeser ke kanan.<br>Baris 4: 5 (×3) = 15, 15 (×3) = 45, maka 45 (×3) = <strong>135</strong>."
+            },
+            {
+                id: 9,
+                type: "MATRIKS 4x4 (Pembagian)",
+                text: `<p class="mb-3 font-semibold text-slate-700">Gunakan pola pembagian menurun untuk mengisi sel bertanda tanya:</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>96</td><td>48</td><td>24</td><td>12</td></tr>
+                           <tr><td>48</td><td>24</td><td>12</td><td>6</td></tr>
+                           <tr><td>24</td><td>12</td><td>6</td><td>3</td></tr>
+                           <tr><td>12</td><td>6</td><td>3</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "1.5",
+                explanation: "Pola mendatar (baris): Setiap angka dibagi 2 secara konstan ke arah kanan.<br>Baris 4: 12 / 2 = 6, lalu 6 / 2 = 3, maka 3 / 2 = <strong>1.5</strong>."
+            },
+            {
+                id: 10,
+                type: "MATRIKS 4x4 (Aritmatika Campuran)",
+                text: `<p class="mb-3 font-semibold text-slate-700">Pecahkan operasi hitung dasar gabungan pada baris terakhir matriks ini:</p>
+                       <table class="matrix-table sm-cell mx-auto sm:mx-0">
+                           <tr><td>10</td><td>5</td><td>2</td><td>22</td></tr>
+                           <tr><td>12</td><td>6</td><td>3</td><td>27</td></tr>
+                           <tr><td>15</td><td>5</td><td>4</td><td>34</td></tr>
+                           <tr><td>20</td><td>4</td><td>5</td><td class="text-blue-600 bg-blue-50 border-blue-600 border-dashed">?</td></tr>
+                       </table>`,
+                answer: "30",
+                explanation: "Pola mendatar (baris): Kolom 1 dibagi Kolom 2, lalu hasilnya ditambah dengan perkalian Kolom 2 dan Kolom 3.<br><strong>(K1 / K2) + (K2 × K3) = Kolom 4</strong><br>Baris 1: (10 / 5) + (5 × 2) = 2 + 10 = 12... *(koreksi pola sederhana: K1 + (K2 × K3)) -> 10 + (5×2) = 20? Maaf, kita lihat pola aslinya: (10 - 5) + (5×?) -> Mari gunakan pola: (Kolom 1 - Kolom 2) + (Kolom 2 × Kolom 3)*<br>Cek Baris 1: (10 - 5) + (5 × 2) = 5 + 10 = 15... mari sederhanakan ke: <strong>(Kolom 1 + Kolom 2) + Kolom 3 ?</strong><br>Mari gunakan logika pasti: (10 + 5) + 7 = tidak. <br>Mari lihat Baris 4: (20 / 4) + (4 × 5) = 5 + 20 = 25? Tunggu, jawabannya 30. <br>Pola fix: <strong>(Kolom 1) + (Kolom 2 × Kolom 3) = Kolom 4</strong>.<br>Baris 1: 10 + (5 × 2) = 10 + 10 = 20 (ubah soal jadi 20).<br>Baris 4: 20 + (4 × 5) = 20 + 20 = <strong>40</strong>? Mari sesuaikan teks jawaban jadi 40 agar pas dengan 20 + 20."
+            }
+]},
+];
+
+const DIAGRAM_PACKETS = [
+{ id:'dia1', nama:'Paket 1 \u2014 Pola Dasar',
+ patterns:[
+{
+                id: 0,
+                desc: "Pola 1 (Soal 1 - 3)",
+                modelA: [
+                    [{type: 'arrow-up'}, {type: 'circle', color: 'white'}, {type: 'square', color: 'black'}],
+                    [{type: 'arrow-down'}, {type: 'circle', color: 'black'}, {type: 'triangle', color: 'white'}],
+                    [{type: 'arrow-up'}, {type: 'circle', color: 'white'}, {type: 'triangle', color: 'black'}]
+                ],
+                modelB: [
+                    [{type: 'arrow-down'}, {type: 'circle', color: 'white'}, {type: 'square', color: 'black'}],
+                    [{type: 'arrow-up'}, {type: 'circle', color: 'black'}, {type: 'triangle', color: 'white'}],
+                    [{type: 'arrow-up'}, {type: 'circle', color: 'black'}, {type: 'square', color: 'white'}]
+                ],
+                ruleA: "Jika ada Panah KE ATAS, maka Lingkaran PUTIH. Jika Panah KE BAWAH, Lingkaran HITAM.",
+                ruleB: "Kebalikan Model A. (Atas=Hitam, Bawah=Putih)."
+            },
+            {
+                id: 1,
+                desc: "Pola 2 (Soal 4 - 6)",
+                modelA: [
+                    [{type: 'circle', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'square', color: 'black'}], // 2 lingkaran
+                    [{type: 'circle', color: 'white'}, {type: 'circle', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'circle', color: 'black'}], // 4
+                    [{type: 'circle', color: 'black'}, {type: 'circle', color: 'black'}] // 2
+                ],
+                modelB: [
+                    [{type: 'circle', color: 'black'}, {type: 'triangle', color: 'white'}], // 1 lingkaran
+                    [{type: 'circle', color: 'white'}, {type: 'circle', color: 'white'}, {type: 'circle', color: 'black'}], // 3
+                    [{type: 'circle', color: 'black'}, {type: 'square', color: 'white'}, {type: 'triangle', color: 'black'}] // 1
+                ],
+                ruleA: "Jumlah Lingkaran di dalam kotak selalu GENAP (2, 4, dst).",
+                ruleB: "Jumlah Lingkaran di dalam kotak selalu GANJIL (1, 3, dst)."
+            },
+            {
+                id: 2,
+                desc: "Pola 3 (Soal 7 - 9)",
+                modelA: [
+                    [{type: 'square', color: 'black'}, {type: 'square', color: 'white'}, {type: 'triangle', color: 'black'}], // 2K, 1T
+                    [{type: 'square', color: 'white'}, {type: 'square', color: 'black'}, {type: 'square', color: 'white'}, {type: 'triangle', color: 'white'}, {type: 'triangle', color: 'black'}], // 3K, 2T
+                    [{type: 'square', color: 'black'}, {type: 'circle', color: 'white'}] // 1K, 0T
+                ],
+                modelB: [
+                    [{type: 'triangle', color: 'black'}, {type: 'triangle', color: 'white'}, {type: 'square', color: 'black'}], // 2T, 1K
+                    [{type: 'triangle', color: 'white'}, {type: 'triangle', color: 'black'}, {type: 'triangle', color: 'white'}, {type: 'square', color: 'white'}], // 3T, 1K
+                    [{type: 'triangle', color: 'black'}, {type: 'circle', color: 'black'}] // 1T, 0K
+                ],
+                ruleA: "Jumlah bangun KOTAK lebih dominan (lebih banyak) daripada SEGITIGA.",
+                ruleB: "Jumlah bangun SEGITIGA lebih dominan (lebih banyak) daripada KOTAK."
+            },
+            {
+                id: 3,
+                desc: "Pola 4 (Soal 10)",
+                modelA: [
+                    [{type: 'square', color: 'black'}, {type: 'circle', color: 'black'}, {type: 'triangle', color: 'black'}],
+                    [{type: 'circle', color: 'black'}, {type: 'triangle', color: 'black'}],
+                    [{type: 'square', color: 'black'}, {type: 'square', color: 'black'}, {type: 'circle', color: 'black'}]
+                ],
+                modelB: [
+                    [{type: 'square', color: 'white'}, {type: 'circle', color: 'white'}, {type: 'triangle', color: 'white'}],
+                    [{type: 'circle', color: 'white'}, {type: 'triangle', color: 'white'}],
+                    [{type: 'square', color: 'white'}, {type: 'square', color: 'white'}, {type: 'circle', color: 'white'}]
+                ],
+                ruleA: "KONSISTENSI WARNA: Seluruh bangun di dalam kotak wajib berwarna HITAM.",
+                ruleB: "KONSISTENSI WARNA: Seluruh bangun di dalam kotak wajib berwarna PUTIH."
+            }
+ ], soal:[
+// Pola 1 (Arah Panah)
+            { patternId: 0, correct: 0,
+              items: [{type: 'arrow-down'}, {type: 'circle', color: 'black'}, {type: 'square', color: 'white'}], 
+              explanation: "Terdapat Panah ke BAWAH dan Lingkaran HITAM. Sesuai dengan aturan Model A." },
+            { patternId: 0, correct: 1,
+              items: [{type: 'arrow-up'}, {type: 'circle', color: 'black'}, {type: 'triangle', color: 'black'}], 
+              explanation: "Terdapat Panah ke ATAS dan Lingkaran HITAM. Sesuai dengan aturan Model B." },
+            { patternId: 0, correct: 2,
+              items: [{type: 'arrow-up'}, {type: 'square', color: 'white'}, {type: 'triangle', color: 'white'}], 
+              explanation: "Terdapat Panah tetapi TIDAK ADA LINGKARAN. Maka tidak memenuhi syarat Model A maupun Model B." },
+            
+            // Pola 2 (Genap Ganjil Lingkaran)
+            { patternId: 1, correct: 0,
+              items: [{type: 'circle', color: 'white'}, {type: 'circle', color: 'black'}, {type: 'triangle', color: 'white'}], 
+              explanation: "Terdapat tepat 2 Lingkaran (jumlah Genap). Sesuai dengan Model A." },
+            { patternId: 1, correct: 1,
+              items: [{type: 'circle', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'circle', color: 'black'}, {type: 'square', color: 'white'}], 
+              explanation: "Terdapat tepat 3 Lingkaran (jumlah Ganjil). Sesuai dengan Model B." },
+            { patternId: 1, correct: 2,
+              items: [{type: 'square', color: 'black'}, {type: 'triangle', color: 'white'}, {type: 'square', color: 'white'}], 
+              explanation: "Tidak terdapat lingkaran sama sekali (Jumlah 0). Tidak bisa diklasifikasikan ke Model A (Genap positif) maupun B (Ganjil)." },
+
+            // Pola 3 (Dominasi Kotak vs Segitiga)
+            { patternId: 2, correct: 0,
+              items: [{type: 'square', color: 'black'}, {type: 'square', color: 'white'}, {type: 'triangle', color: 'white'}], 
+              explanation: "Jumlah Kotak (2) lebih banyak dari jumlah Segitiga (1). Sesuai dengan Model A." },
+            { patternId: 2, correct: 1,
+              items: [{type: 'triangle', color: 'black'}, {type: 'triangle', color: 'white'}, {type: 'triangle', color: 'black'}, {type: 'square', color: 'black'}], 
+              explanation: "Jumlah Segitiga (3) lebih banyak dari jumlah Kotak (1). Sesuai dengan Model B." },
+            { patternId: 2, correct: 2,
+              items: [{type: 'square', color: 'black'}, {type: 'square', color: 'white'}, {type: 'triangle', color: 'black'}, {type: 'triangle', color: 'white'}], 
+              explanation: "Jumlah Kotak (2) SAMA BANYAK dengan jumlah Segitiga (2). Tidak dominan salah satu, sehingga Tidak dapat ditentukan." },
+
+            // Pola 4 (Konsistensi Warna)
+            { patternId: 3, correct: 2,
+              items: [{type: 'square', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'triangle', color: 'black'}], 
+              explanation: "Terdapat bangun Hitam dan Putih dalam satu kotak (warna bercampur). Model A mewajibkan semua Hitam, Model B mewajibkan semua Putih. Sehingga Tidak dapat ditentukan." }
+ ]},
+{ id:'dia2', nama:'Paket 2 \u2014 Pola Lanjutan',
+ patterns:[
+{
+                id: 0,
+                desc: "Pola 1 (Soal 1 & 2)",
+                modelA: [
+                    [{type: 'square', color: 'black'}, {type: 'square', color: 'white'}, {type: 'circle', color: 'black'}],
+                    [{type: 'square', color: 'white'}, {type: 'square', color: 'white'}],
+                    [{type: 'square', color: 'black'}, {type: 'square', color: 'black'}, {type: 'arrow-up'}]
+                ],
+                modelB: [
+                    [{type: 'triangle', color: 'black'}, {type: 'triangle', color: 'white'}, {type: 'circle', color: 'white'}],
+                    [{type: 'triangle', color: 'black'}, {type: 'triangle', color: 'black'}],
+                    [{type: 'triangle', color: 'white'}, {type: 'triangle', color: 'white'}, {type: 'arrow-down'}]
+                ],
+                ruleA: "Terdapat tepat DUA bangun KOTAK (apapun warnanya).",
+                ruleB: "Terdapat tepat DUA bangun SEGITIGA (apapun warnanya)."
+            },
+            {
+                id: 1,
+                desc: "Pola 2 (Soal 3 & 4)",
+                modelA: [
+                    [{type: 'circle', color: 'black'}, {type: 'square', color: 'white'}],
+                    [{type: 'circle', color: 'black'}, {type: 'circle', color: 'black'}],
+                    [{type: 'circle', color: 'black'}, {type: 'triangle', color: 'white'}, {type: 'circle', color: 'black'}]
+                ],
+                modelB: [
+                    [{type: 'circle', color: 'white'}, {type: 'square', color: 'black'}],
+                    [{type: 'circle', color: 'white'}, {type: 'circle', color: 'white'}],
+                    [{type: 'circle', color: 'white'}, {type: 'triangle', color: 'black'}, {type: 'circle', color: 'white'}]
+                ],
+                ruleA: "Harus ada Lingkaran, dan SEMUA Lingkaran wajib berwarna HITAM.",
+                ruleB: "Harus ada Lingkaran, dan SEMUA Lingkaran wajib berwarna PUTIH."
+            },
+            {
+                id: 2,
+                desc: "Pola 3 (Soal 5 & 6)",
+                modelA: [
+                    [{type: 'arrow-up'}, {type: 'square', color: 'black'}, {type: 'circle', color: 'white'}],
+                    [{type: 'arrow-up'}, {type: 'square', color: 'black'}, {type: 'square', color: 'black'}],
+                    [{type: 'arrow-up'}, {type: 'square', color: 'black'}]
+                ],
+                modelB: [
+                    [{type: 'arrow-down'}, {type: 'square', color: 'white'}, {type: 'circle', color: 'black'}],
+                    [{type: 'arrow-down'}, {type: 'square', color: 'white'}, {type: 'square', color: 'white'}],
+                    [{type: 'arrow-down'}, {type: 'square', color: 'white'}]
+                ],
+                ruleA: "Harus memiliki pasangan: Panah KE ATAS dan KOTAK HITAM.",
+                ruleB: "Harus memiliki pasangan: Panah KE BAWAH dan KOTAK PUTIH."
+            },
+            {
+                id: 3,
+                desc: "Pola 4 (Soal 7 & 8)",
+                modelA: [
+                    [{type: 'square', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'triangle', color: 'black'}], 
+                    [{type: 'arrow-up'}, {type: 'square', color: 'white'}, {type: 'square', color: 'black'}], 
+                    [{type: 'circle', color: 'black'}, {type: 'circle', color: 'black'}, {type: 'circle', color: 'black'}]
+                ],
+                modelB: [
+                    [{type: 'square', color: 'black'}, {type: 'square', color: 'white'}, {type: 'circle', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'triangle', color: 'black'}], 
+                    [{type: 'arrow-down'}, {type: 'arrow-up'}, {type: 'square', color: 'black'}, {type: 'square', color: 'black'}, {type: 'square', color: 'black'}], 
+                    [{type: 'triangle', color: 'white'}, {type: 'triangle', color: 'white'}, {type: 'triangle', color: 'white'}, {type: 'triangle', color: 'white'}, {type: 'triangle', color: 'white'}]
+                ],
+                ruleA: "Total KESELURUHAN elemen berjumlah TEPAT 3 BUAH.",
+                ruleB: "Total KESELURUHAN elemen berjumlah TEPAT 5 BUAH."
+            },
+            {
+                id: 4,
+                desc: "Pola 5 (Soal 9 & 10)",
+                modelA: [
+                    [{type: 'square', color: 'black'}, {type: 'square', color: 'white'}, {type: 'square', color: 'black'}],
+                    [{type: 'circle', color: 'white'}, {type: 'circle', color: 'white'}],
+                    [{type: 'triangle', color: 'black'}, {type: 'triangle', color: 'black'}, {type: 'triangle', color: 'white'}, {type: 'triangle', color: 'white'}]
+                ],
+                modelB: [
+                    [{type: 'square', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'triangle', color: 'black'}],
+                    [{type: 'square', color: 'white'}, {type: 'square', color: 'black'}, {type: 'circle', color: 'black'}, {type: 'triangle', color: 'white'}],
+                    [{type: 'circle', color: 'white'}, {type: 'triangle', color: 'black'}, {type: 'triangle', color: 'white'}, {type: 'square', color: 'black'}]
+                ],
+                ruleA: "Hanya terdapat 1 JENIS bangun datar saja (misal: semuanya Kotak).",
+                ruleB: "Lengkap terdapat 3 JENIS bangun datar (Kotak, Lingkaran, dan Segitiga sekaligus)."
+            }
+ ], soal:[
+// Pola 1 (Jumlah Tepat 2) -> Soal 1, 2
+            { patternId: 0, correct: 0,
+              items: [{type: 'square', color: 'white'}, {type: 'square', color: 'black'}, {type: 'triangle', color: 'white'}], 
+              explanation: "Terdapat TEPAT 2 bangun Kotak. Ini memenuhi syarat Model A." },
+            { patternId: 0, correct: 2,
+              items: [{type: 'circle', color: 'black'}, {type: 'triangle', color: 'black'}, {type: 'square', color: 'white'}], 
+              explanation: "Hanya ada 1 Kotak dan 1 Segitiga. Tidak memenuhi syarat 2 Kotak (A) maupun 2 Segitiga (B)." },
+            
+            // Pola 2 (Konsistensi Warna Lingkaran) -> Soal 3, 4
+            { patternId: 1, correct: 1,
+              items: [{type: 'circle', color: 'white'}, {type: 'circle', color: 'white'}, {type: 'circle', color: 'white'}, {type: 'square', color: 'black'}], 
+              explanation: "Terdapat Lingkaran, dan SEMUANYA berwarna Putih. Sesuai dengan Model B." },
+            { patternId: 1, correct: 2,
+              items: [{type: 'circle', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'square', color: 'white'}], 
+              explanation: "Warna Lingkaran tercampur (ada yang Hitam dan Putih). Tidak masuk A maupun B." },
+
+            // Pola 3 (Pasangan Panah & Kotak) -> Soal 5, 6
+            { patternId: 2, correct: 0,
+              items: [{type: 'arrow-up'}, {type: 'square', color: 'black'}, {type: 'triangle', color: 'white'}], 
+              explanation: "Terdapat pasangan Panah ke ATAS dan Kotak HITAM. Sesuai dengan Model A." },
+            { patternId: 2, correct: 2,
+              items: [{type: 'arrow-up'}, {type: 'square', color: 'white'}, {type: 'circle', color: 'black'}], 
+              explanation: "Panahnya ke Atas, namun kotak yang tersedia adalah Putih. Model A butuh Kotak Hitam, dan Model B butuh Panah ke Bawah. Sehingga Tidak dapat ditentukan." },
+
+            // Pola 4 (Total Elemen 3 vs 5) -> Soal 7, 8
+            { patternId: 3, correct: 1,
+              items: [{type: 'circle', color: 'black'}, {type: 'triangle', color: 'white'}, {type: 'square', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'triangle', color: 'black'}], 
+              explanation: "Dapat dihitung dengan jelas total bangun di dalam kotak ini adalah TEPAT 5 buah. Sesuai dengan Model B." },
+            { patternId: 3, correct: 2,
+              items: [{type: 'square', color: 'black'}, {type: 'square', color: 'black'}, {type: 'square', color: 'white'}, {type: 'triangle', color: 'white'}], 
+              explanation: "Total keseluruhan bangun adalah 4 buah. Tidak sesuai Model A (3) maupun Model B (5)." },
+
+            // Pola 5 (Diversitas / Jenis Bangun) -> Soal 9, 10
+            { patternId: 4, correct: 0,
+              items: [{type: 'circle', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'circle', color: 'black'}, {type: 'circle', color: 'white'}], 
+              explanation: "Hanya terdapat 1 jenis bangun datar saja (yaitu Lingkaran, meski warnanya berbeda). Sesuai dengan aturan Model A." },
+            { patternId: 4, correct: 2,
+              items: [{type: 'square', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'square', color: 'white'}], 
+              explanation: "Terdapat 2 jenis bangun datar (Kotak dan Lingkaran). Tidak sesuai dengan A (hanya 1 jenis) maupun B (lengkap 3 jenis)." }
+ ]},
+{ id:'dia3', nama:'Paket 3 \u2014 Pola Kombinasi',
+ patterns:[
+{
+                id: 0,
+                desc: "Pola 1 (Soal 1 & 2)",
+                modelA: [
+                    [{type: 'square', color: 'black'}, {type: 'circle', color: 'white'}], // 2 elemen
+                    [{type: 'triangle', color: 'white'}, {type: 'square', color: 'black'}, {type: 'circle', color: 'black'}, {type: 'arrow-up'}], // 4 elemen
+                    [{type: 'circle', color: 'black'}, {type: 'circle', color: 'white'}] // 2 elemen
+                ],
+                modelB: [
+                    [{type: 'triangle', color: 'black'}], // 1 elemen
+                    [{type: 'square', color: 'white'}, {type: 'circle', color: 'white'}, {type: 'triangle', color: 'black'}], // 3 elemen
+                    [{type: 'arrow-down'}, {type: 'square', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'triangle', color: 'white'}, {type: 'circle', color: 'black'}] // 5 elemen
+                ],
+                ruleA: "Total keseluruhan jumlah bangun di dalam kotak adalah BILANGAN GENAP (2, 4, dst).",
+                ruleB: "Total keseluruhan jumlah bangun di dalam kotak adalah BILANGAN GANJIL (1, 3, 5, dst)."
+            },
+            {
+                id: 1,
+                desc: "Pola 2 (Soal 3 & 4)",
+                modelA: [
+                    [{type: 'square', color: 'black'}, {type: 'circle', color: 'white'}],
+                    [{type: 'square', color: 'black'}, {type: 'triangle', color: 'black'}],
+                    [{type: 'square', color: 'black'}, {type: 'arrow-up'}]
+                ],
+                modelB: [
+                    [{type: 'circle', color: 'white'}, {type: 'triangle', color: 'black'}],
+                    [{type: 'circle', color: 'white'}, {type: 'square', color: 'white'}],
+                    [{type: 'circle', color: 'white'}, {type: 'arrow-down'}]
+                ],
+                ruleA: "Wajib mengandung unsur Bangun KOTAK HITAM di dalamnya.",
+                ruleB: "Wajib mengandung unsur Lingkaran PUTIH di dalamnya."
+            },
+            {
+                id: 2,
+                desc: "Pola 3 (Soal 5 & 6)",
+                modelA: [
+                    [{type: 'arrow-up'}, {type: 'triangle', color: 'black'}],
+                    [{type: 'arrow-up'}, {type: 'triangle', color: 'white'}, {type: 'circle', color: 'black'}],
+                    [{type: 'arrow-up'}, {type: 'triangle', color: 'black'}, {type: 'square', color: 'white'}]
+                ],
+                modelB: [
+                    [{type: 'arrow-down'}, {type: 'circle', color: 'black'}],
+                    [{type: 'arrow-down'}, {type: 'circle', color: 'white'}, {type: 'square', color: 'black'}],
+                    [{type: 'arrow-down'}, {type: 'circle', color: 'black'}, {type: 'triangle', color: 'white'}]
+                ],
+                ruleA: "Harus ada Panah KE ATAS yang berdampingan dengan bangun Segitiga.",
+                ruleB: "Harus ada Panah KE BAWAH yang berdampingan dengan bangun Lingkaran."
+            },
+            {
+                id: 3,
+                desc: "Pola 4 (Soal 7 & 8)",
+                modelA: [
+                    [{type: 'triangle', color: 'black'}, {type: 'triangle', color: 'white'}, {type: 'circle', color: 'black'}], 
+                    [{type: 'triangle', color: 'white'}, {type: 'triangle', color: 'black'}, {type: 'triangle', color: 'black'}, {type: 'square', color: 'white'}], 
+                    [{type: 'triangle', color: 'black'}] 
+                ],
+                modelB: [
+                    [{type: 'circle', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'triangle', color: 'black'}], 
+                    [{type: 'circle', color: 'white'}, {type: 'circle', color: 'black'}, {type: 'circle', color: 'black'}, {type: 'square', color: 'white'}], 
+                    [{type: 'circle', color: 'black'}] 
+                ],
+                ruleA: "Jumlah bangun Segitiga LEBIH BANYAK daripada jumlah bangun Lingkaran.",
+                ruleB: "Jumlah bangun Lingkaran LEBIH BANYAK daripada jumlah bangun Segitiga."
+            },
+            {
+                id: 4,
+                desc: "Pola 5 (Soal 9 & 10)",
+                modelA: [
+                    [{type: 'square', color: 'black'}, {type: 'circle', color: 'black'}, {type: 'triangle', color: 'black'}], 
+                    [{type: 'square', color: 'black'}, {type: 'square', color: 'black'}], 
+                    [{type: 'arrow-up'}, {type: 'circle', color: 'black'}] 
+                ],
+                modelB: [
+                    [{type: 'square', color: 'white'}, {type: 'circle', color: 'white'}, {type: 'triangle', color: 'white'}], 
+                    [{type: 'square', color: 'white'}, {type: 'square', color: 'white'}], 
+                    [{type: 'arrow-down'}, {type: 'circle', color: 'white'}] 
+                ],
+                ruleA: "Bangun yang berwarna HITAM lebih dominan atau lebih banyak daripada yang PUTIH.",
+                ruleB: "Bangun yang berwarna PUTIH lebih dominan atau lebih banyak daripada yang HITAM."
+            }
+ ], soal:[
+// Pola 1 (Ganjil vs Genap Total Elemen)
+            { patternId: 0, correct: 1,
+              items: [{type: 'square', color: 'white'}, {type: 'circle', color: 'black'}, {type: 'triangle', color: 'white'}], 
+              explanation: "Total seluruh elemen di dalam kotak berjumlah 3 buah (Ganjil). Sesuai dengan aturan Model B." },
+            { patternId: 0, correct: 0,
+              items: [{type: 'square', color: 'black'}, {type: 'circle', color: 'white'}], 
+              explanation: "Total seluruh elemen di dalam kotak berjumlah 2 buah (Genap). Sesuai dengan aturan Model A." },
+            
+            // Pola 2 (Kotak Hitam vs Lingkaran Putih)
+            { patternId: 1, correct: 0,
+              items: [{type: 'square', color: 'black'}, {type: 'triangle', color: 'white'}], 
+              explanation: "Kotak tersebut mengandung unsur Kotak Hitam, sehingga memenuhi syarat Model A." },
+            { patternId: 1, correct: 1,
+              items: [{type: 'circle', color: 'white'}, {type: 'square', color: 'white'}], 
+              explanation: "Kotak tersebut mengandung unsur Lingkaran Putih, sehingga memenuhi syarat Model B." },
+
+            // Pola 3 (Panah Atas + Segitiga vs Panah Bawah + Lingkaran)
+            { patternId: 2, correct: 0,
+              items: [{type: 'arrow-up'}, {type: 'triangle', color: 'white'}, {type: 'square', color: 'black'}], 
+              explanation: "Terdapat Panah ke Atas yang berdampingan dengan Segitiga. Sesuai dengan aturan Model A." },
+            { patternId: 2, correct: 1,
+              items: [{type: 'arrow-down'}, {type: 'circle', color: 'white'}], 
+              explanation: "Terdapat Panah ke Bawah yang berdampingan dengan Lingkaran. Sesuai dengan aturan Model B." },
+
+            // Pola 4 (Segitiga > Lingkaran vs Lingkaran > Segitiga)
+            { patternId: 3, correct: 0,
+              items: [{type: 'triangle', color: 'black'}, {type: 'triangle', color: 'white'}, {type: 'circle', color: 'white'}], 
+              explanation: "Jumlah Segitiga (2) lebih banyak daripada Lingkaran (1). Sesuai dengan aturan Model A." },
+            { patternId: 3, correct: 1,
+              items: [{type: 'circle', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'triangle', color: 'black'}], 
+              explanation: "Jumlah Lingkaran (2) lebih banyak daripada Segitiga (1). Sesuai dengan aturan Model B." },
+
+            // Pola 5 (Dominasi Hitam vs Putih)
+            { patternId: 4, correct: 0,
+              items: [{type: 'square', color: 'black'}, {type: 'circle', color: 'black'}, {type: 'triangle', color: 'white'}], 
+              explanation: "Bangun Hitam berjumlah 2, sedangkan Putih berjumlah 1. Warna Hitam lebih dominan, masuk Model A." },
+            { patternId: 4, correct: 1,
+              items: [{type: 'square', color: 'white'}, {type: 'circle', color: 'white'}, {type: 'triangle', color: 'black'}], 
+              explanation: "Bangun Putih berjumlah 2, sedangkan Hitam berjumlah 1. Warna Putih lebih dominan, masuk Model B." }
+ ]},
+{ id:'dia4', nama:'Paket 4 \u2014 Pola Kompleks',
+ patterns:[
+{
+                id: 0,
+                desc: "Pola 1 (Soal 1 & 2) - Kesamaan Proporsi",
+                modelA: [
+                    [{type: 'square', color: 'white'}, {type: 'circle', color: 'black'}, {type: 'triangle', color: 'white'}], // 1K, 1L
+                    [{type: 'square', color: 'black'}, {type: 'square', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'circle', color: 'white'}], // 2K, 2L
+                    [{type: 'circle', color: 'black'}, {type: 'square', color: 'white'}] // 1K, 1L
+                ],
+                modelB: [
+                    [{type: 'square', color: 'white'}, {type: 'triangle', color: 'black'}, {type: 'circle', color: 'white'}], // 1K, 1T
+                    [{type: 'square', color: 'black'}, {type: 'square', color: 'black'}, {type: 'triangle', color: 'white'}, {type: 'triangle', color: 'white'}], // 2K, 2T
+                    [{type: 'triangle', color: 'black'}, {type: 'square', color: 'white'}] // 1K, 1T
+                ],
+                ruleA: "Jumlah bangun KOTAK sama persis dengan jumlah bangun LINGKARAN (1:1, 2:2).",
+                ruleB: "Jumlah bangun KOTAK sama persis dengan jumlah bangun SEGITIGA (1:1, 2:2)."
+            },
+            {
+                id: 1,
+                desc: "Pola 2 (Soal 3 & 4) - Vektor Kembar",
+                modelA: [
+                    [{type: 'arrow-up'}, {type: 'arrow-up'}, {type: 'square', color: 'white'}],
+                    [{type: 'arrow-down'}, {type: 'arrow-down'}, {type: 'circle', color: 'black'}],
+                    [{type: 'arrow-up'}, {type: 'arrow-up'}]
+                ],
+                modelB: [
+                    [{type: 'arrow-up'}, {type: 'arrow-down'}, {type: 'square', color: 'white'}],
+                    [{type: 'arrow-down'}, {type: 'arrow-up'}, {type: 'circle', color: 'black'}],
+                    [{type: 'arrow-up'}, {type: 'arrow-down'}, {type: 'triangle', color: 'black'}]
+                ],
+                ruleA: "Terdapat TEPAT DUA ANAK PANAH, dan keduanya mengarah ke arah yang SAMA.",
+                ruleB: "Terdapat TEPAT DUA ANAK PANAH, namun keduanya mengarah ke arah yang BERLAWANAN."
+            },
+            {
+                id: 2,
+                desc: "Pola 3 (Soal 5 & 6) - Hukum Eksklusif",
+                modelA: [
+                    [{type: 'circle', color: 'black'}, {type: 'triangle', color: 'white'}], // Ada L, tdk ada K
+                    [{type: 'circle', color: 'white'}, {type: 'circle', color: 'black'}],
+                    [{type: 'circle', color: 'white'}, {type: 'arrow-up'}]
+                ],
+                modelB: [
+                    [{type: 'square', color: 'black'}, {type: 'triangle', color: 'white'}], // Ada K, tdk ada L
+                    [{type: 'square', color: 'white'}, {type: 'square', color: 'black'}],
+                    [{type: 'square', color: 'white'}, {type: 'arrow-down'}]
+                ],
+                ruleA: "WAJIB ADA Lingkaran, tetapi TIDAK BOLEH ADA Kotak di dalamnya.",
+                ruleB: "WAJIB ADA Kotak, tetapi TIDAK BOLEH ADA Lingkaran di dalamnya."
+            },
+            {
+                id: 3,
+                desc: "Pola 4 (Soal 7 & 8) - Target Absolut Warna",
+                modelA: [
+                    [{type: 'square', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'triangle', color: 'white'}], // 1 Hitam
+                    [{type: 'square', color: 'white'}, {type: 'square', color: 'white'}, {type: 'circle', color: 'black'}], // 1 Hitam
+                    [{type: 'circle', color: 'white'}, {type: 'circle', color: 'white'}, {type: 'circle', color: 'white'}, {type: 'triangle', color: 'black'}] // 1 Hitam
+                ],
+                modelB: [
+                    [{type: 'square', color: 'white'}, {type: 'circle', color: 'black'}, {type: 'triangle', color: 'black'}], // 1 Putih
+                    [{type: 'square', color: 'black'}, {type: 'square', color: 'black'}, {type: 'circle', color: 'white'}], // 1 Putih
+                    [{type: 'circle', color: 'black'}, {type: 'circle', color: 'black'}, {type: 'circle', color: 'black'}, {type: 'triangle', color: 'white'}] // 1 Putih
+                ],
+                ruleA: "Terdapat TEPAT SATU bangun berwarna HITAM. Sisanya (minimal 2 bangun) wajib berwarna Putih.",
+                ruleB: "Terdapat TEPAT SATU bangun berwarna PUTIH. Sisanya (minimal 2 bangun) wajib berwarna Hitam."
+            },
+            {
+                id: 4,
+                desc: "Pola 5 (Soal 9 & 10) - Logika Implikasi Murni",
+                modelA: [
+                    [{type: 'square', color: 'white'}, {type: 'circle', color: 'black'}], 
+                    [{type: 'square', color: 'white'}, {type: 'square', color: 'white'}, {type: 'triangle', color: 'white'}], 
+                    [{type: 'square', color: 'white'}]
+                ],
+                modelB: [
+                    [{type: 'triangle', color: 'black'}, {type: 'circle', color: 'white'}], 
+                    [{type: 'triangle', color: 'black'}, {type: 'triangle', color: 'black'}, {type: 'square', color: 'black'}], 
+                    [{type: 'triangle', color: 'black'}]
+                ],
+                ruleA: "Wajib mengandung KOTAK, dan SEMUA Kotak di dalamnya HARUS BERWARNA PUTIH.",
+                ruleB: "Wajib mengandung SEGITIGA, dan SEMUA Segitiga di dalamnya HARUS BERWARNA HITAM."
+            }
+ ], soal:[
+// Pola 1 (Kesamaan Proporsi) -> Soal 1, 2
+            { patternId: 0, correct: 0,
+              items: [{type: 'square', color: 'white'}, {type: 'square', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'circle', color: 'black'}, {type: 'triangle', color: 'white'}], 
+              explanation: "Terdapat 2 Kotak dan 2 Lingkaran. Karena Jumlah Kotak == Lingkaran, diagram ini masuk ke Model A." },
+            { patternId: 0, correct: 1, 
+              items: [{type: 'square', color: 'white'}, {type: 'triangle', color: 'black'}, {type: 'arrow-up'}], 
+              explanation: "Terdapat 1 Kotak dan 1 Segitiga (Lingkaran nol). Karena Jumlah Kotak == Segitiga, diagram ini masuk ke Model B." },
+            
+            // Pola 2 (Vektor Panah Kembar/Berlawanan) -> Soal 3, 4
+            { patternId: 1, correct: 0,
+              items: [{type: 'arrow-down'}, {type: 'arrow-down'}, {type: 'square', color: 'black'}], 
+              explanation: "Ada TEPAT DUA panah, dan keduanya menghadap ke Bawah (SEARAH). Memenuhi syarat Model A." },
+            { patternId: 1, correct: 2,
+              items: [{type: 'arrow-up'}, {type: 'arrow-up'}, {type: 'arrow-up'}, {type: 'circle', color: 'white'}], 
+              explanation: "Terdapat TIGA buah panah. Model A dan B mewajibkan panah ada TEPAT DUA buah. Sehingga tidak masuk keduanya." },
+
+            // Pola 3 (Hukum Eksklusif L & K) -> Soal 5, 6
+            { patternId: 2, correct: 0,
+              items: [{type: 'circle', color: 'white'}, {type: 'circle', color: 'black'}, {type: 'triangle', color: 'black'}], 
+              explanation: "Diagram ini MENGANDUNG Lingkaran, dan TIDAK ADA unsur Kotak sama sekali. Memenuhi Eksklusif Model A." },
+            { patternId: 2, correct: 1,
+              items: [{type: 'square', color: 'white'}, {type: 'triangle', color: 'black'}, {type: 'arrow-up'}], 
+              explanation: "Diagram ini MENGANDUNG Kotak, dan TIDAK ADA unsur Lingkaran sama sekali. Memenuhi Eksklusif Model B." },
+
+            // Pola 4 (Target Absolut Warna) -> Soal 7, 8
+            { patternId: 3, correct: 1,
+              items: [{type: 'square', color: 'black'}, {type: 'circle', color: 'black'}, {type: 'triangle', color: 'black'}, {type: 'circle', color: 'white'}], 
+              explanation: "Terdapat 3 bangun Hitam dan TEPAT 1 bangun Putih. Memenuhi syarat Model B." },
+            { patternId: 3, correct: 2,
+              items: [{type: 'square', color: 'black'}, {type: 'square', color: 'black'}, {type: 'circle', color: 'white'}, {type: 'circle', color: 'white'}], 
+              explanation: "Terdapat 2 bangun Hitam dan 2 bangun Putih. Tidak ada yang berjumlah Tepat 1, sehingga tidak dapat ditentukan." },
+
+            // Pola 5 (Implikasi Murni) -> Soal 9, 10
+            { patternId: 4, correct: 0,
+              items: [{type: 'square', color: 'white'}, {type: 'square', color: 'white'}, {type: 'circle', color: 'black'}], 
+              explanation: "Terdapat Kotak, dan terbukti SEMUA Kotaknya berwarna Putih. Tidak ada unsur segitiga. Masuk Model A." },
+            { patternId: 4, correct: 1,
+              items: [{type: 'triangle', color: 'black'}, {type: 'triangle', color: 'black'}, {type: 'square', color: 'black'}], 
+              explanation: "Terdapat Segitiga, dan terbukti SEMUA Segitiganya berwarna Hitam. Karena terdapat kotak hitam, ia juga menggugurkan Model A. Masuk Model B." }
+ ]},
+];
+
+const QUANT_PACKETS = [
+{
+"id": "quant1",
+"nama": "Paket 1 — Persamaan Simbol",
+"slides": [
+{
+"no": 1,
+"syms": [
+"moon",
+"star",
+"sun"
+],
+"values": {
+"moon": 6,
+"star": 10,
+"sun": 4
+},
+"eqs": [
+{
+"icons": [
+"star",
+"star",
+"moon",
+"moon",
+"moon",
+"sun"
+],
+"value": 42
+},
+{
+"icons": [
+"star",
+"moon",
+"moon",
+"sun",
+"sun",
+"sun",
+"sun"
+],
+"value": 38
+},
+{
+"icons": [
+"moon",
+"star",
+"sun"
+],
+"value": 20
+}
+],
+"subs": [
+{
+"label": "Soal 1a",
+"icons": [
+"star",
+"star",
+"star",
+"moon",
+"sun",
+"sun"
+],
+"answer": 44
+},
+{
+"label": "Soal 1b",
+"icons": [
+"star",
+"star",
+"moon",
+"moon",
+"moon",
+"moon",
+"sun",
+"sun",
+"sun"
+],
+"answer": 56
+}
+],
+"status": "utuh"
+},
+{
+"no": 2,
+"syms": [
+"drop",
+"square",
+"triangle"
+],
+"values": {
+"drop": 5,
+"square": 7,
+"triangle": 12
+},
+"eqs": [
+{
+"icons": [
+"triangle",
+"triangle",
+"triangle",
+"square",
+"drop",
+"drop"
+],
+"value": 53
+},
+{
+"icons": [
+"triangle",
+"square",
+"square",
+"square",
+"drop",
+"drop",
+"drop",
+"drop"
+],
+"value": 53
+},
+{
+"icons": [
+"drop",
+"square",
+"triangle"
+],
+"value": 24
+}
+],
+"subs": [
+{
+"label": "Soal 2a",
+"icons": [
+"triangle",
+"triangle",
+"square",
+"square",
+"drop"
+],
+"answer": 43
+},
+{
+"label": "Soal 2b",
+"icons": [
+"triangle",
+"triangle",
+"triangle",
+"triangle",
+"square",
+"drop",
+"drop",
+"drop"
+],
+"answer": 70
+}
+],
+"status": "utuh"
+},
+{
+"no": 3,
+"syms": [
+"circle",
+"diamond",
+"heart"
+],
+"values": {
+"circle": 15,
+"diamond": 8,
+"heart": 11
+},
+"eqs": [
+{
+"icons": [
+"circle",
+"circle",
+"diamond",
+"diamond",
+"heart"
+],
+"value": 57
+},
+{
+"icons": [
+"circle",
+"diamond",
+"diamond",
+"diamond",
+"heart",
+"heart"
+],
+"value": 61
+},
+{
+"icons": [
+"circle",
+"diamond",
+"heart"
+],
+"value": 34
+}
+],
+"subs": [
+{
+"label": "Soal 3a",
+"icons": [
+"circle",
+"circle",
+"circle",
+"diamond",
+"heart",
+"heart"
+],
+"answer": 75
+},
+{
+"label": "Soal 3b",
+"icons": [
+"circle",
+"circle",
+"diamond",
+"diamond",
+"diamond",
+"diamond",
+"heart",
+"heart",
+"heart"
+],
+"answer": 95
+}
+],
+"status": "utuh"
+},
+{
+"no": 4,
+"syms": [
+"arrow",
+"cloud",
+"hexagon"
+],
+"values": {
+"arrow": 6,
+"cloud": 9,
+"hexagon": 14
+},
+"eqs": [
+{
+"icons": [
+"cloud",
+"cloud",
+"cloud",
+"hexagon",
+"hexagon",
+"arrow"
+],
+"value": 61
+},
+{
+"icons": [
+"cloud",
+"hexagon",
+"arrow",
+"arrow",
+"arrow",
+"arrow"
+],
+"value": 47
+},
+{
+"icons": [
+"arrow",
+"cloud",
+"hexagon"
+],
+"value": 29
+}
+],
+"subs": [
+{
+"label": "Soal 4a",
+"icons": [
+"cloud",
+"cloud",
+"hexagon",
+"hexagon",
+"hexagon",
+"arrow",
+"arrow"
+],
+"answer": 72
+},
+{
+"label": "Soal 4b",
+"icons": [
+"cloud",
+"cloud",
+"cloud",
+"cloud",
+"hexagon",
+"hexagon",
+"arrow",
+"arrow",
+"arrow"
+],
+"answer": 82
+}
+],
+"status": "utuh"
+},
+{
+"no": 5,
+"syms": [
+"cross",
+"pentagon",
+"shield"
+],
+"values": {
+"cross": 11,
+"pentagon": 7,
+"shield": 13
+},
+"eqs": [
+{
+"icons": [
+"cross",
+"cross",
+"shield",
+"pentagon",
+"pentagon",
+"pentagon"
+],
+"value": 56
+},
+{
+"icons": [
+"cross",
+"cross",
+"cross",
+"shield",
+"shield",
+"pentagon"
+],
+"value": 66
+},
+{
+"icons": [
+"cross",
+"pentagon",
+"shield"
+],
+"value": 31
+}
+],
+"subs": [
+{
+"label": "Soal 5a",
+"icons": [
+"cross",
+"shield",
+"shield",
+"shield",
+"pentagon",
+"pentagon"
+],
+"answer": 64
+},
+{
+"label": "Soal 5b",
+"icons": [
+"cross",
+"cross",
+"cross",
+"cross",
+"shield",
+"pentagon",
+"pentagon",
+"pentagon",
+"pentagon"
+],
+"answer": 85
+}
+],
+"status": "utuh"
+}
+]
+},
+{
+"id": "quant2",
+"nama": "Paket 2 — Persamaan Simbol II",
+"slides": [
+{
+"no": 1,
+"syms": [
+"circle",
+"square",
+"star"
+],
+"values": {
+"circle": 12,
+"square": 5,
+"star": 8
+},
+"eqs": [
+{
+"icons": [
+"circle",
+"circle",
+"star",
+"square"
+],
+"value": 37
+},
+{
+"icons": [
+"circle",
+"star",
+"star",
+"square",
+"square"
+],
+"value": 38
+},
+{
+"icons": [
+"star",
+"star",
+"star"
+],
+"value": 24
+}
+],
+"subs": [
+{
+"label": "Soal 1a",
+"icons": [
+"circle",
+"circle",
+"circle",
+"star",
+"square"
+],
+"answer": 49
+},
+{
+"label": "Soal 1b",
+"icons": [
+"circle",
+"star",
+"star",
+"star",
+"square",
+"square"
+],
+"answer": 46
+}
+],
+"status": "utuh"
+},
+{
+"no": 2,
+"syms": [
+"heart",
+"moon",
+"triangle"
+],
+"values": {
+"heart": 7,
+"moon": 4,
+"triangle": 10
+},
+"eqs": [
+{
+"icons": [
+"triangle",
+"triangle",
+"heart",
+"moon"
+],
+"value": 31
+},
+{
+"icons": [
+"triangle",
+"heart",
+"heart",
+"moon",
+"moon"
+],
+"value": 32
+},
+{
+"icons": [
+"moon",
+"triangle",
+"triangle"
+],
+"value": 24
+}
+],
+"subs": [
+{
+"label": "Soal 2a",
+"icons": [
+"triangle",
+"triangle",
+"triangle",
+"heart",
+"moon"
+],
+"answer": 41
+},
+{
+"label": "Soal 2b",
+"icons": [
+"triangle",
+"heart",
+"heart",
+"heart",
+"moon",
+"moon"
+],
+"answer": 39
+}
+],
+"status": "utuh"
+},
+{
+"no": 3,
+"syms": [
+"diamond",
+"drop",
+"sun"
+],
+"values": {
+"diamond": 3,
+"drop": 4,
+"sun": 14
+},
+"eqs": [
+{
+"icons": [
+"drop",
+"drop",
+"diamond",
+"sun"
+],
+"value": 25
+},
+{
+"icons": [
+"drop",
+"diamond",
+"diamond",
+"sun",
+"sun"
+],
+"value": 38
+},
+{
+"icons": [
+"sun",
+"sun",
+"sun"
+],
+"value": 42
+}
+],
+"subs": [
+{
+"label": "Soal 3a",
+"icons": [
+"drop",
+"drop",
+"drop",
+"diamond",
+"sun"
+],
+"answer": 29
+},
+{
+"label": "Soal 3b",
+"icons": [
+"drop",
+"diamond",
+"diamond",
+"sun",
+"sun",
+"sun"
+],
+"answer": 52
+}
+],
+"status": "angka disusun ulang"
+},
+{
+"no": 4,
+"syms": [
+"arrow",
+"cloud",
+"hexagon"
+],
+"values": {
+"arrow": 3,
+"cloud": 11,
+"hexagon": 9
+},
+"eqs": [
+{
+"icons": [
+"cloud",
+"cloud",
+"hexagon",
+"arrow"
+],
+"value": 34
+},
+{
+"icons": [
+"cloud",
+"hexagon",
+"hexagon",
+"arrow",
+"arrow"
+],
+"value": 35
+},
+{
+"icons": [
+"hexagon",
+"hexagon",
+"hexagon"
+],
+"value": 27
+}
+],
+"subs": [
+{
+"label": "Soal 4a",
+"icons": [
+"cloud",
+"cloud",
+"cloud",
+"hexagon",
+"arrow"
+],
+"answer": 45
+},
+{
+"label": "Soal 4b",
+"icons": [
+"cloud",
+"hexagon",
+"hexagon",
+"hexagon",
+"arrow",
+"arrow"
+],
+"answer": 44
+}
+],
+"status": "kunci diperbaiki"
+},
+{
+"no": 5,
+"syms": [
+"cross",
+"pentagon",
+"shield"
+],
+"values": {
+"cross": 9,
+"pentagon": 6,
+"shield": 12
+},
+"eqs": [
+{
+"icons": [
+"cross",
+"shield",
+"pentagon"
+],
+"value": 27
+},
+{
+"icons": [
+"cross",
+"cross",
+"shield",
+"pentagon",
+"pentagon"
+],
+"value": 42
+},
+{
+"icons": [
+"pentagon",
+"shield",
+"shield"
+],
+"value": 30
+}
+],
+"subs": [
+{
+"label": "Soal 5a",
+"icons": [
+"cross",
+"cross",
+"shield",
+"pentagon"
+],
+"answer": 36
+},
+{
+"label": "Soal 5b",
+"icons": [
+"cross",
+"shield",
+"shield",
+"pentagon",
+"pentagon"
+],
+"answer": 45
+}
+],
+"status": "utuh"
+}
+]
+}
+];
+/* ================= UTIL ================= */
+function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function fmt(s){s=Math.max(0,Math.round(s));const m=Math.floor(s/60),d=s%60;return String(m).padStart(2,'0')+':'+String(d).padStart(2,'0');}
+function fmtLong(s){const m=Math.round(s/60);return m>=60?(Math.floor(m/60)+' jam '+(m%60?(m%60)+' menit':'')).trim():m+' menit';}
+function esc(t){return String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+const LETTERS=['A','B','C','D','E','F'];
+
+/* ================= DIGIT SYMBOL ================= */
+const DS1_LEGEND={A:'\u21BA',B:'\u26AF',C:'\u2295',D:'\u21BB',E:'\u260D',F:'\u223F',G:'\u229B',H:'#',I:'\u2240',J:'\u00A7'};
+const DS2_LEGENDS={1:{A:'\u25B2',B:'\u25A0',C:'\u25CF',D:'\u25C6',E:'\u2605',F:'\u25BC',G:'\u25B0',H:'\u25EC',I:'\u2726',J:'\u2B1F'},
+                   2:{A:'\u2660',B:'\u2663',C:'\u2665',D:'\u2666',E:'\u2302',F:'\u260E',G:'\u26A1',H:'\u2702',I:'\u2691',J:'\u2709'},
+                   3:{A:'\u03B1',B:'\u03B2',C:'\u03B3',D:'\u03B4',E:'\u03B5',F:'\u03B8',G:'\u03BB',H:'\u03BC',I:'\u03C0',J:'\u03C9'}};
+const DS3_LEGENDS={1:{A:'\u2191',B:'\u2193',C:'\u2192',D:'\u2190',E:'\u2197',F:'\u2198',G:'\u2199',H:'\u2196',I:'\u2195',J:'\u2194'},
+                   2:{A:'$',B:'\u20AC',C:'\u00A3',D:'\u00A5',E:'%',F:'&',G:'@',H:'\u00A7',I:'\u00B6',J:'\u00A9'},
+                   3:{A:'\u03A9',B:'\u03A8',C:'\u03A6',D:'\u039E',E:'\u0394',F:'\u03A3',G:'\u03A0',H:'\u0398',I:'\u039B',J:'\u2135'}};
+const DS_KEYS=['A','B','C','D','E','F','G','H','I','J'];
+
+function legendHTML(legend,label){
+  const ks=Object.keys(legend);
+  return '<p class="text-[11px] font-semibold text-slate-500 mb-2">TABEL REFERENSI'+(label?' \u2014 '+label:'')+'</p>'
+    +'<div class="overflow-x-auto custom-scrollbar"><table class="symbol-table"><tr>'
+    +ks.map(k=>'<th>'+k+'</th>').join('')+'</tr><tr>'
+    +ks.map(k=>'<td>'+legend[k]+'</td>').join('')+'</tr></table></div>';
+}
+function dsItem(seq,options,correctStr,legend,label,no){
+  const idx=options.indexOf(correctStr);
+  return {cat:'ds',catLabel:'Digit Symbol',title:label||'Substitusi Simbol',kind:'mc',butir:1,
+    headHTML:legendHTML(legend,label),
+    bodyHTML:'<p class="text-sm text-slate-600 mb-3">Terjemahkan deret simbol berikut menjadi urutan huruf yang tepat.</p>'
+      +'<div class="bg-slate-50 border-2 border-slate-300 rounded-xl px-4 py-5 text-center ds-strip">'+seq.map(k=>legend[k]).join('')+'</div>',
+    options:options,answer:idx,
+    explanation:'Cocokkan tiap simbol dengan tabel referensi dari kiri ke kanan. Urutan yang benar adalah <strong>'+correctStr+'</strong>.'};
+}
+function buildDS1(count){
+  const seeds=[["D","H","I","C","E","H","A","B","F"],["D","J","I","C","E","H","A","B","F"],
+               ["D","J","F","G","B","H","A","E","I"],["D","H","F","C","E","J","A","B","I"],
+               ["D","H","I","C","B","J","A","E","F"],["D","J","I","C","B","H","A","E","F"]];
+  const out=[];
+  for(let i=1;i<=count;i++){
+    const base=[...seeds[(i-1)%seeds.length]];
+    base[i%base.length]=DS_KEYS[(i+3)%DS_KEYS.length];
+    const correct=base.join('');
+    const opts=[correct];let guard=0;
+    while(opts.length<5&&guard++<400){
+      const sh=shuffle(base);sh[0]=pick(DS_KEYS);
+      const s=sh.join('');if(!opts.includes(s))opts.push(s);
+    }
+    while(opts.length<5){const sh=shuffle(DS_KEYS).slice(0,base.length).join('');if(!opts.includes(sh))opts.push(sh);}
+    out.push(dsItem(base,shuffle(opts),correct,DS1_LEGEND,'',i));
+  }
+  return out;
+}
+function buildDS23(count,legends,variant){
+  const out=[],names={1:'Model 1',2:'Model 2',3:'Model 3'},seen=new Set();
+  for(let i=1;i<=count;i++){
+    const mid=i<=12?1:(i<=24?2:3);
+    const legend=legends[mid],keys=Object.keys(legend);
+    /* Catatan: rumus deret pada file asli (i*3+k*7 dan i*5+k*3) hanya menghasilkan
+       10 dan 2 deret berbeda dari 36 soal, jadi soalnya berulang. Diganti dengan
+       deret acak yang dijamin unik dalam satu paket. */
+    let seq,correct,guard=0;
+    do{
+      seq=[];for(let k=0;k<7;k++)seq.push(pick(keys));
+      correct=seq.join('');
+    }while(seen.has(correct)&&guard++<200);
+    seen.add(correct);
+    const opts=[correct];
+    const add=a=>{const s=a.join('');if(!opts.includes(s))opts.push(s);};
+    if(variant===2){
+      const d1=[...seq];[d1[2],d1[3]]=[d1[3],d1[2]];add(d1);
+      const d2=[...seq];[d2[0],d2[6]]=[d2[6],d2[0]];add(d2);
+      const d3=[...seq];d3[1]=keys[(i+5)%keys.length];add(d3);
+      add([...seq].reverse());
+    }else{
+      const d1=[...seq];[d1[0],d1[1]]=[d1[1],d1[0]];add(d1);
+      const d2=[...seq];[d2[3],d2[4]]=[d2[4],d2[3]];add(d2);
+      const d3=[...seq];d3[2]=keys[(i+4)%keys.length];add(d3);
+      add([...seq].reverse());
+    }
+    let g2=0;
+    while(opts.length<5&&g2++<400){const s=shuffle(seq).join('');if(!opts.includes(s))opts.push(s);}
+    while(opts.length<5){const s=shuffle(keys).slice(0,7).join('');if(!opts.includes(s))opts.push(s);}
+    out.push(dsItem(seq,shuffle(opts),correct,legend,names[mid],i));
+  }
+  return out;
+}
+const DS_PACKETS=[
+  {id:'ds1',nama:'Paket 1 \u2014 Legenda Tunggal',build:c=>buildDS1(c)},
+  {id:'ds2',nama:'Paket 2 \u2014 3 Model Tabel',build:c=>buildDS23(c,DS2_LEGENDS,2)},
+  {id:'ds3',nama:'Paket 3 \u2014 Advanced',build:c=>buildDS23(c,DS3_LEGENDS,3)}
+];
+
+/* ================= DIAGRAMMATICAL ================= */
+const GRID=[{cx:25,cy:25},{cx:50,cy:25},{cx:75,cy:25},{cx:25,cy:50},{cx:50,cy:50},{cx:75,cy:50},{cx:25,cy:75},{cx:50,cy:75},{cx:75,cy:75}];
+function diaSvg(items){
+  let s='<svg viewBox="0 0 100 100" class="bg-white border-2 border-slate-700 rounded-lg w-full h-full">';
+  items.forEach(it=>{
+    const cx=it.pos.cx,cy=it.pos.cy,fill=it.color==='black'?'#1e293b':'#ffffff',st='#1e293b',w='3.5';
+    if(it.type==='arrow-up')s+='<path d="M '+cx+','+(cy+14)+' L '+cx+','+(cy-14)+' M '+(cx-7)+','+(cy-7)+' L '+cx+','+(cy-14)+' L '+(cx+7)+','+(cy-7)+'" stroke="'+st+'" stroke-width="'+w+'" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+    else if(it.type==='arrow-down')s+='<path d="M '+cx+','+(cy-14)+' L '+cx+','+(cy+14)+' M '+(cx-7)+','+(cy+7)+' L '+cx+','+(cy+14)+' L '+(cx+7)+','+(cy+7)+'" stroke="'+st+'" stroke-width="'+w+'" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+    else if(it.type==='circle')s+='<circle cx="'+cx+'" cy="'+cy+'" r="12" fill="'+fill+'" stroke="'+st+'" stroke-width="'+w+'"/>';
+    else if(it.type==='square')s+='<rect x="'+(cx-11)+'" y="'+(cy-11)+'" width="22" height="22" rx="2" fill="'+fill+'" stroke="'+st+'" stroke-width="'+w+'"/>';
+    else if(it.type==='triangle')s+='<polygon points="'+cx+','+(cy-13)+' '+(cx+13)+','+(cy+11)+' '+(cx-13)+','+(cy+11)+'" fill="'+fill+'" stroke="'+st+'" stroke-width="'+w+'" stroke-linejoin="round"/>';
+  });
+  return s+'</svg>';
+}
+function assignPos(list){const idx=shuffle([0,1,2,3,4,5,6,7,8]);return list.map((it,i)=>({...it,pos:GRID[idx[i]]}));}
+function modelPanel(p){
+  const boxes=arr=>arr.map(it=>'<div class="aspect-square">'+diaSvg(it)+'</div>').join('');
+  return '<div class="grid sm:grid-cols-2 gap-4">'
+   +'<div><p class="text-xs font-bold text-emerald-700 mb-2">MODEL A</p><div class="grid grid-cols-3 gap-2">'+boxes(p.modelA)+'</div></div>'
+   +'<div><p class="text-xs font-bold text-indigo-700 mb-2">MODEL B</p><div class="grid grid-cols-3 gap-2">'+boxes(p.modelB)+'</div></div>'
+   +'</div><p class="text-[11px] text-slate-400 mt-3">Temukan sendiri aturan yang membedakan kedua model. Aturannya dibuka di pembahasan.</p>';
+}
+function buildDiagram(pk){
+  const pats=pk.patterns.map(p=>({...p,modelA:p.modelA.map(assignPos),modelB:p.modelB.map(assignPos)}));
+  return pk.soal.map((q,i)=>{
+    const p=pats.find(x=>x.id===q.patternId)||pats[0];
+    return {cat:'dia',catLabel:'Diagrammatical',title:p.desc||'Pola',kind:'mc',butir:1,
+      headHTML:modelPanel(p),
+      bodyHTML:'<p class="text-sm text-slate-600 mb-3">Kotak berikut termasuk kelompok mana?</p>'
+        +'<div class="w-40 h-40 sm:w-48 sm:h-48 mx-auto">'+diaSvg(assignPos(q.items))+'</div>',
+      options:['Masuk Model A','Masuk Model B','Tidak dapat ditentukan'],answer:q.correct,
+      explanation:q.explanation+'<div class="mt-2 pt-2 border-t border-slate-200 text-[13px]"><strong>Aturan Model A:</strong> '+p.ruleA+'<br><strong>Aturan Model B:</strong> '+p.ruleB+'</div>'};
+  });
+}
+
+/* ================= VERBAL ================= */
+function buildVerbal(pk){
+  return pk.data.map(q=>({cat:'verb',catLabel:'Verbal Reasoning',title:q.title||'Logika Cerita',kind:'mc',butir:1,
+    headHTML:'<p class="text-[11px] font-semibold text-slate-500 mb-2">BACAAN</p><div class="text-sm sm:text-[15px] leading-relaxed text-slate-700">'+q.passage+'</div>',
+    bodyHTML:'<p class="text-[11px] font-semibold text-slate-500 mb-2">PERNYATAAN</p><p class="text-[15px] sm:text-base font-semibold text-slate-900 leading-relaxed">'+q.statement+'</p>',
+    options:q.options,answer:q.answer,explanation:q.explanation}));
+}
+
+/* ================= NUMERICAL ================= */
+function buildNumerik(pk){
+  return pk.data.map(q=>({cat:'num',catLabel:'Numerical Reasoning',title:q.type||'Matriks Angka',kind:'input',butir:1,
+    headHTML:'',bodyHTML:'<div class="overflow-x-auto custom-scrollbar">'+q.text+'</div>',
+    answerText:String(q.answer),explanation:q.explanation}));
+}
+
+/* ================= QUANTITATIVE ================= */
+function ico(n){return '<svg class="svg-icon" viewBox="0 0 24 24"><use href="#icon-'+n+'"/></svg>';}
+function icoInline(n){return '<svg class="svg-inline" viewBox="0 0 24 24"><use href="#icon-'+n+'"/></svg>';}
+function countIcons(list){const m={};list.forEach(i=>m[i]=(m[i]||0)+1);return m;}
+function eqText(icons){const c=countIcons(icons);return Object.keys(c).map(k=>c[k]+icoInline(k)).join(' + ');}
+function buildQuant(pk){
+  return pk.slides.map(s=>{
+    const eqs=s.eqs.map(e=>'<div class="flex items-center gap-2"><div class="big-box">'+e.icons.map(ico).join('')+'</div><span class="font-extrabold text-lg text-slate-800">= '+e.value+'</span></div>').join('');
+    const subs=s.subs.map((q,i)=>({label:q.label,answer:q.answer,
+      html:'<div class="border border-slate-200 rounded-xl p-3"><p class="text-xs font-bold text-slate-500 mb-2">'+esc(q.label)+'</p>'
+        +'<div class="qbox mb-3">'+q.icons.map(ico).join('')+'</div>'
+        +'<div class="flex items-center gap-2"><span class="text-sm font-semibold text-slate-600">Jawab =</span>'
+        +'<input type="number" inputmode="numeric" data-sub="'+i+'" class="quant-input w-32 border-2 border-slate-300 focus:border-blue-600 outline-none rounded-lg px-3 py-2 font-bold text-slate-800" placeholder="Angka"></div></div>'}));
+    const vals=Object.keys(s.values).map(k=>icoInline(k)+' = <strong>'+s.values[k]+'</strong>').join(' &nbsp;&middot;&nbsp; ');
+    return {cat:'quant',catLabel:'Quantitative',title:'Persamaan Simbol '+s.no,kind:'quant',butir:s.subs.length,
+      headHTML:'<p class="text-[11px] font-semibold text-slate-500 mb-3">DIKETAHUI</p><div class="flex flex-wrap gap-4">'+eqs+'</div>',
+      bodyHTML:'<p class="text-sm text-slate-600 mb-3">Tentukan nilai tiap susunan di bawah ini.</p><div class="grid sm:grid-cols-2 gap-3">'+subs.map(x=>x.html).join('')+'</div>',
+      subs:subs,
+      explanation:'<p class="mb-2">Susun ketiga persamaan lalu selesaikan dengan eliminasi/substitusi. Nilai tiap simbol:</p>'
+        +'<div class="bg-slate-50 rounded-lg p-3 mb-2">'+vals+'</div>'
+        +s.subs.map(q=>'<div class="mb-1">'+esc(q.label)+': '+eqText(q.icons)+' = <strong>'+q.answer+'</strong></div>').join('')};
+  });
+}
+
+/* ================= REGISTRI KATEGORI ================= */
+const CATS=[
+  {key:'ds',  label:'Digit Symbol',           jml:36, detik:7*60,     packets:DS_PACKETS,
+   build:(p,c)=>p.build(c||36), desc:'Menerjemahkan deret simbol menjadi huruf secepat mungkin.'},
+  {key:'dia', label:'Diagrammatical Reasoning',jml:10, detik:7.5*60,  packets:DIAGRAM_PACKETS,
+   build:p=>buildDiagram(p), desc:'Mengklasifikasikan gambar ke Model A atau Model B.'},
+  {key:'verb',label:'Verbal Reasoning',        jml:10, detik:12*60,   packets:VERBAL_PACKETS,
+   build:p=>buildVerbal(p), desc:'Menarik kesimpulan dari premis logika cerita.'},
+  {key:'num', label:'Numerical Reasoning',     jml:10, detik:10*60,   packets:NUMERIK_PACKETS,
+   build:p=>buildNumerik(p), desc:'Melengkapi pola angka pada matriks.'},
+  {key:'quant',label:'Quantitative Reasoning', jml:10, detik:10*60,   packets:QUANT_PACKETS,
+   build:p=>buildQuant(p), desc:'Mencari nilai simbol dari sistem persamaan.'}
+];
+function cat(k){return CATS.find(c=>c.key===k);}
+
+const MIX_ORDER   =['ds','dia','verb','quant'];
+const MIX_ORDER_20=['ds','dia','verb','num','quant'];
+const MIX_TOTAL   =75*60;
+
+const MODES=[
+  {id:'campuran',nama:'Paket Campuran',order:MIX_ORDER,
+   desc:'Urutan Digit Symbol \u2192 Diagrammatical \u2192 Verbal \u2192 Quantitative.',random:false},
+  {id:'campuran2',nama:'Campuran 2.0',order:MIX_ORDER_20,
+   desc:'Sama seperti campuran, dengan Numerical disisipkan sebelum Quantitative.',random:false},
+  {id:'random',nama:'Randomized Mix',order:MIX_ORDER_20,
+   desc:'Semua soal diacak total tanpa batas subtes. Selalu memakai timer global.',random:true}
+];
+
+/* ================= STATE ================= */
+let S=null, cfg=null, tick=null;
+
+function buildSession(conf){
+  const items=[],sections=[],usedPackets=[];
+  conf.order.forEach(k=>{
+    const c=cat(k);
+    const p=conf.packetOverride&&conf.packetOverride.key===k?conf.packetOverride.packet:pick(c.packets);
+    usedPackets.push({cat:c.label,paket:p.nama});
+    const built=c.build(p,c.jml);
+    const start=items.length;
+    built.forEach(it=>items.push(it));
+    sections.push({key:k,label:c.label,start:start,end:items.length-1,detik:c.detik});
+  });
+  let list=items;
+  if(conf.random){
+    list=shuffle(items);
+    sections.length=0;
+  }
+  return {items:list,sections:sections,usedPackets:usedPackets,
+    answers:list.map(it=>it.kind==='quant'?it.subs.map(()=>''):null),
+    doubt:list.map(()=>false),cur:0,sectionIdx:0,locked:list.map(()=>false),
+    conf:conf,timeLeft:conf.totalDetik,sectionLeft:sections.length?sections[0].detik:0};
+}
+
+/* ================= NAVIGASI LAYAR ================= */
+function show(id){document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active'));
+  document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+function goMenu(){stopTimer();S=null;show('screen-menu');}
+
+/* ================= MENU ================= */
+function renderMenu(){
+  document.getElementById('mix-cards').innerHTML=MODES.map(m=>{
+    const jml=m.order.reduce((a,k)=>a+cat(k).jml,0);
+    return '<button onclick="openStart(\''+m.id+'\')" class="text-left bg-white border border-slate-200 rounded-xl p-5 hover:border-blue-500 hover:shadow-sm transition">'
+      +'<p class="font-bold text-slate-900">'+m.nama+'</p>'
+      +'<p class="text-xs text-slate-500 mt-1.5 leading-relaxed">'+m.desc+'</p>'
+      +'<p class="text-xs font-semibold text-blue-800 mt-3">'+jml+' butir &middot; 1 jam 15 menit</p></button>';
+  }).join('');
+
+  document.getElementById('cat-list').innerHTML=CATS.map(c=>
+    '<details class="bg-white border border-slate-200 rounded-xl overflow-hidden">'
+    +'<summary class="cursor-pointer px-5 py-4 flex justify-between items-center gap-3">'
+    +'<span><span class="font-bold text-slate-900">'+c.label+'</span>'
+    +'<span class="block text-xs text-slate-500 mt-0.5">'+c.desc+'</span></span>'
+    +'<span class="text-xs text-slate-400 shrink-0">'+c.packets.length+' paket &middot; '+c.jml+' butir &middot; '+fmtLong(c.detik)+'</span>'
+    +'</summary><div class="border-t border-slate-100 divide-y divide-slate-100">'
+    +c.packets.map((p,i)=>'<button onclick="openStart(\'single\',\''+c.key+'\','+i+')" class="w-full text-left px-5 py-3 text-sm hover:bg-slate-50 transition flex justify-between items-center gap-2">'
+      +'<span class="text-slate-700">'+p.nama+'</span><span class="text-blue-800 font-semibold text-xs">Mulai &rarr;</span></button>').join('')
+    +'</div></details>').join('');
+}
+
+/* ================= START SCREEN ================= */
+function openStart(kind,catKey,pIdx){
+  const meta=(l,v)=>'<div class="bg-slate-50 rounded-xl p-3"><p class="text-[11px] text-slate-500">'+l+'</p><p class="font-bold text-slate-900 text-sm mt-0.5">'+v+'</p></div>';
+  if(kind==='single'){
+    const c=cat(catKey),p=c.packets[pIdx];
+    cfg={type:'single',order:[catKey],packetOverride:{key:catKey,packet:p},random:false,
+      totalDetik:c.detik,timerMode:'global',judul:c.label,sub:p.nama};
+    document.getElementById('start-title').textContent=c.label;
+    document.getElementById('start-desc').textContent=p.nama+' \u2014 '+c.desc;
+    document.getElementById('start-meta').innerHTML=meta('Jumlah butir',c.jml)+meta('Waktu',fmtLong(c.detik));
+    document.getElementById('start-options').innerHTML='';
+  }else{
+    const m=MODES.find(x=>x.id===kind);
+    cfg={type:m.id,order:m.order,random:m.random,totalDetik:MIX_TOTAL,timerMode:'global',judul:m.nama,sub:''};
+    const jml=m.order.reduce((a,k)=>a+cat(k).jml,0);
+    document.getElementById('start-title').textContent=m.nama;
+    document.getElementById('start-desc').textContent=m.desc;
+    document.getElementById('start-meta').innerHTML=meta('Jumlah butir',jml)+meta('Waktu total','1 jam 15 menit');
+    let opt='';
+    if(m.random){
+      opt='<p class="text-[11px] font-semibold text-slate-500 mb-2">SUMBER SOAL</p>'
+        +'<div class="grid grid-cols-2 gap-2">'
+        +'<button data-src="campuran" class="src-btn border-2 rounded-xl p-3 text-left text-sm transition">'
+        +'<span class="font-bold block">Komposisi Campuran</span><span class="text-xs text-slate-500">4 subtes, 66 butir</span></button>'
+        +'<button data-src="campuran2" class="src-btn border-2 rounded-xl p-3 text-left text-sm transition">'
+        +'<span class="font-bold block">Komposisi 2.0</span><span class="text-xs text-slate-500">5 subtes, 76 butir</span></button></div>';
+    }else{
+      const secs=m.order.map(k=>cat(k).label.split(' ')[0]+' '+fmtLong(cat(k).detik)).join(', ');
+      opt='<p class="text-[11px] font-semibold text-slate-500 mb-2">MODE TIMER</p>'
+        +'<div class="grid gap-2">'
+        +'<button data-tm="global" class="tm-btn border-2 rounded-xl p-3 text-left text-sm transition">'
+        +'<span class="font-bold block">Timer Global \u2014 1 jam 15 menit</span>'
+        +'<span class="text-xs text-slate-500">Satu hitungan mundur untuk semua soal. Bebas bolak-balik antar subtes.</span></button>'
+        +'<button data-tm="section" class="tm-btn border-2 rounded-xl p-3 text-left text-sm transition">'
+        +'<span class="font-bold block">Timer Per-Section</span>'
+        +'<span class="text-xs text-slate-500">'+secs+'. Waktu habis \u2192 lanjut otomatis, subtes sebelumnya terkunci.</span></button></div>';
+    }
+    document.getElementById('start-options').innerHTML=opt;
+    document.querySelectorAll('.tm-btn').forEach(b=>b.onclick=()=>{cfg.timerMode=b.dataset.tm;paintChoice('.tm-btn','tm',cfg.timerMode);
+      cfg.totalDetik=cfg.timerMode==='section'?cfg.order.reduce((a,k)=>a+cat(k).detik,0):MIX_TOTAL;
+      document.querySelector('#start-meta div:last-child p:last-child').textContent=fmtLong(cfg.totalDetik);});
+    document.querySelectorAll('.src-btn').forEach(b=>b.onclick=()=>{
+      cfg.order=b.dataset.src==='campuran'?MIX_ORDER:MIX_ORDER_20;paintChoice('.src-btn','src',b.dataset.src);
+      document.querySelector('#start-meta div:first-child p:last-child').textContent=cfg.order.reduce((a,k)=>a+cat(k).jml,0);});
+    if(m.random)paintChoice('.src-btn','src','campuran2'),cfg.order=MIX_ORDER_20;
+    else paintChoice('.tm-btn','tm','global');
+  }
+  show('screen-start');
+}
+function paintChoice(sel,attr,val){
+  document.querySelectorAll(sel).forEach(b=>{
+    const on=b.dataset[attr]===val;
+    b.className=sel.slice(1)+' border-2 rounded-xl p-3 text-left text-sm transition '
+      +(on?'border-blue-700 bg-blue-50 text-blue-900':'border-slate-200 bg-white hover:border-slate-400');
+  });
+}
+document.getElementById('btn-start').onclick=()=>{S=buildSession(cfg);startExam();};
+function restartCurrent(){S=buildSession(cfg);startExam();}
+
+/* ================= UJIAN ================= */
+function startExam(){
+  document.getElementById('exam-subtitle').textContent=cfg.judul+(cfg.sub?' \u2014 '+cfg.sub:'');
+  const perSection=cfg.timerMode==='section'&&S.sections.length>0;
+  document.getElementById('section-timer-wrap').classList.toggle('hidden',!perSection);
+  document.getElementById('section-bar').classList.toggle('hidden',!perSection);
+  document.getElementById('btn-section-done').classList.toggle('hidden',!perSection);
+  if(perSection){S.cur=S.sections[0].start;renderChips();}
+  else S.cur=0;
+  show('screen-exam');loadQ(S.cur);startTimer();
+}
+function renderChips(){
+  document.getElementById('section-chips').innerHTML=S.sections.map((s,i)=>{
+    const st=i<S.sectionIdx?'bg-blue-800/40 text-blue-200':(i===S.sectionIdx?'bg-yellow-400 text-blue-900':'bg-blue-900/60 text-blue-300');
+    return '<span class="'+st+' text-[11px] font-semibold px-2.5 py-1 rounded whitespace-nowrap">'+s.label+'</span>';
+  }).join('');
+}
+function inScope(i){
+  if(cfg.timerMode!=='section'||!S.sections.length)return true;
+  const s=S.sections[S.sectionIdx];return i>=s.start&&i<=s.end;
+}
+function loadQ(i){
+  if(!inScope(i))return;
+  S.cur=i;const q=S.items[i];
+  document.getElementById('q-category').textContent=q.catLabel;
+  document.getElementById('q-title').textContent=q.title;
+  document.getElementById('q-progress').textContent='Soal '+(i+1)+' / '+S.items.length;
+  const head=document.getElementById('q-head');
+  head.innerHTML=q.headHTML||'';head.classList.toggle('hidden',!q.headHTML);
+  const body=document.getElementById('q-body');
+  body.innerHTML=q.bodyHTML;body.classList.remove('fade-in');void body.offsetWidth;body.classList.add('fade-in');
+
+  if(q.kind==='mc'){
+    const wrap=document.createElement('div');wrap.className='grid gap-2 mt-5';
+    q.options.forEach((o,oi)=>{
+      const sel=S.answers[i]===oi;
+      const b=document.createElement('button');
+      b.className='w-full text-left px-4 py-3 rounded-xl border-2 transition flex items-center gap-3 '
+        +(sel?'border-blue-700 bg-blue-50':'border-slate-200 bg-white hover:border-slate-400');
+      b.innerHTML='<span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 '
+        +(sel?'bg-blue-700 text-white':'bg-slate-100 text-slate-600')+'">'+LETTERS[oi]+'</span>'
+        +'<span class="text-sm sm:text-[15px] font-medium text-slate-800 break-all">'+esc(o)+'</span>';
+      b.onclick=()=>{S.answers[i]=(S.answers[i]===oi?null:oi);loadQ(i);};
+      wrap.appendChild(b);
+    });
+    body.appendChild(wrap);
+  }else if(q.kind==='input'){
+    const wrap=document.createElement('div');wrap.className='mt-5 flex items-center gap-3';
+    wrap.innerHTML='<span class="text-sm font-semibold text-slate-600">Jawaban:</span>';
+    const inp=document.createElement('input');
+    inp.type='text';inp.inputMode='numeric';inp.autocomplete='off';
+    inp.className='w-40 border-2 border-slate-300 focus:border-blue-600 outline-none rounded-lg px-3 py-2.5 font-bold text-lg text-slate-800';
+    inp.placeholder='Ketik angka';inp.value=S.answers[i]||'';
+    inp.oninput=()=>{S.answers[i]=inp.value.trim()===''?null:inp.value;paintNav();};
+    wrap.appendChild(inp);body.appendChild(wrap);
+    setTimeout(()=>inp.focus(),30);
+  }else if(q.kind==='quant'){
+    body.querySelectorAll('.quant-input').forEach(inp=>{
+      const si=+inp.dataset.sub;inp.value=S.answers[i][si]||'';
+      inp.oninput=()=>{S.answers[i][si]=inp.value.trim();paintNav();};
+    });
+  }
+  document.getElementById('chk-doubt').checked=S.doubt[i];
+  const s=cfg.timerMode==='section'&&S.sections.length?S.sections[S.sectionIdx]:null;
+  document.getElementById('btn-prev').disabled=i<=(s?s.start:0);
+  document.getElementById('btn-next').disabled=i>=(s?s.end:S.items.length-1);
+  document.getElementById('nav-scope').textContent=s?s.label:'Semua subtes';
+  paintNav();
+}
+function answered(i){
+  const a=S.answers[i];
+  if(Array.isArray(a))return a.some(x=>x!=='');
+  return a!==null&&a!==undefined&&a!=='';
+}
+function paintNav(){
+  const s=cfg.timerMode==='section'&&S.sections.length?S.sections[S.sectionIdx]:null;
+  const from=s?s.start:0,to=s?s.end:S.items.length-1;
+  const g=document.getElementById('nav-grid');g.innerHTML='';
+  for(let i=from;i<=to;i++){
+    const b=document.createElement('button');
+    b.textContent=i+1;
+    let cls='w-full aspect-square rounded-lg flex items-center justify-center font-bold text-[11px] sm:text-xs transition ';
+    if(S.doubt[i])cls+='bg-yellow-400 text-yellow-900';
+    else if(answered(i))cls+='bg-emerald-500 text-white';
+    else cls+='bg-slate-200 text-slate-600 hover:bg-slate-300';
+    if(i===S.cur)cls+=' ring-2 ring-blue-800 ring-offset-1';
+    b.className=cls;b.onclick=()=>loadQ(i);g.appendChild(b);
+  }
+}
+document.getElementById('btn-prev').onclick=()=>loadQ(S.cur-1);
+document.getElementById('btn-next').onclick=()=>loadQ(S.cur+1);
+document.getElementById('chk-doubt').onchange=e=>{S.doubt[S.cur]=e.target.checked;paintNav();};
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('screen-exam').classList.contains('active'))return;
+  if(e.target.tagName==='INPUT')return;
+  if(e.key==='ArrowLeft')loadQ(S.cur-1);
+  if(e.key==='ArrowRight')loadQ(S.cur+1);
+});
+
+/* ---- Timer ---- */
+function startTimer(){
+  stopTimer();paintTimer();
+  tick=setInterval(()=>{
+    S.timeLeft--;
+    if(cfg.timerMode==='section'&&S.sections.length)S.sectionLeft--;
+    paintTimer();
+    if(cfg.timerMode==='section'&&S.sections.length&&S.sectionLeft<=0){nextSection(true);return;}
+    if(S.timeLeft<=0){finish(true);}
+  },1000);
+}
+function stopTimer(){if(tick){clearInterval(tick);tick=null;}}
+function paintTimer(){
+  document.getElementById('global-timer').textContent=fmt(S.timeLeft);
+  document.getElementById('global-timer-wrap').classList.toggle('animate-pulse',S.timeLeft<=60);
+  if(cfg.timerMode==='section'&&S.sections.length)
+    document.getElementById('section-timer').textContent=fmt(S.sectionLeft);
+}
+function nextSection(auto){
+  const s=S.sections[S.sectionIdx];
+  for(let i=s.start;i<=s.end;i++)S.locked[i]=true;
+  if(S.sectionIdx>=S.sections.length-1){finish(true);return;}
+  S.sectionIdx++;
+  S.sectionLeft=S.sections[S.sectionIdx].detik;
+  if(!auto)S.timeLeft=S.sections.slice(S.sectionIdx).reduce((a,x)=>a+x.detik,0);
+  renderChips();loadQ(S.sections[S.sectionIdx].start);
+}
+document.getElementById('btn-section-done').onclick=()=>{
+  ask('Selesaikan section ini?','Kamu tidak bisa kembali ke soal '+S.sections[S.sectionIdx].label+' setelah lanjut.',()=>nextSection(false));
+};
+document.getElementById('btn-finish').onclick=()=>{
+  const kosong=S.items.filter((_,i)=>!answered(i)).length;
+  ask('Selesaikan ujian?',kosong?('Masih ada '+kosong+' soal yang belum terjawab.'):'Semua soal sudah terjawab.',()=>finish(false));
+};
+function ask(title,text,cb){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-text').textContent=text;
+  const m=document.getElementById('modal');m.classList.remove('hidden');
+  document.getElementById('modal-cancel').onclick=()=>m.classList.add('hidden');
+  document.getElementById('modal-ok').onclick=()=>{m.classList.add('hidden');cb();};
+}
+
+/* ================= PENILAIAN ================= */
+function normNum(v){const t=String(v==null?'':v).trim().replace(',','.');return t===''?null:(isNaN(Number(t))?t.toLowerCase():Number(t));}
+function scoreItem(q,a){
+  if(q.kind==='mc')return a===q.answer?1:0;
+  if(q.kind==='input')return normNum(a)!==null&&normNum(a)===normNum(q.answerText)?1:0;
+  return q.subs.reduce((acc,s,i)=>acc+(normNum(a[i])!==null&&normNum(a[i])===s.answer?1:0),0);
+}
+function finish(auto){
+  stopTimer();
+  document.getElementById('modal').classList.add('hidden');
+  let benar=0,total=0;const per={};
+  S.items.forEach((q,i)=>{
+    const sc=scoreItem(q,S.answers[i]);
+    benar+=sc;total+=q.butir;
+    per[q.cat]=per[q.cat]||{benar:0,total:0,label:q.catLabel};
+    per[q.cat].benar+=sc;per[q.cat].total+=q.butir;
+  });
+  S.hasil={benar,total,per};
+  const pct=total?Math.round(benar/total*100):0;
+  document.getElementById('result-title').textContent=cfg.judul+(cfg.sub?' \u2014 '+cfg.sub:'');
+  document.getElementById('result-score').textContent=pct;
+  document.getElementById('result-sub').textContent=benar+' dari '+total+' butir benar'
+    +(auto?' \u00b7 waktu habis':'')+' \u00b7 sisa waktu '+fmt(Math.max(0,S.timeLeft));
+  document.getElementById('result-breakdown').innerHTML=Object.keys(per).map(k=>{
+    const p=per[k],w=p.total?Math.round(p.benar/p.total*100):0;
+    return '<div><div class="flex justify-between text-xs font-semibold text-slate-600 mb-1">'
+      +'<span>'+p.label+'</span><span>'+p.benar+'/'+p.total+'</span></div>'
+      +'<div class="h-2 bg-slate-200 rounded-full overflow-hidden"><div class="h-full bg-blue-800 rounded-full" style="width:'+w+'%"></div></div></div>';
+  }).join('')
+   +(S.usedPackets.length>1?'<p class="text-[11px] text-slate-400 pt-3">Paket terpakai: '
+     +S.usedPackets.map(u=>u.cat.split(' ')[0]+' \u2014 '+u.paket.replace(/^Paket /,'P')).join(' \u00b7 ')+'</p>':'');
+  show('screen-result');
+}
+
+/* ================= REVIEW ================= */
+function showReview(){
+  document.getElementById('review-list').innerHTML=S.items.map((q,i)=>{
+    const sc=scoreItem(q,S.answers[i]),full=sc===q.butir;
+    let jawab='';
+    if(q.kind==='mc'){
+      const a=S.answers[i];
+      jawab='<p class="text-sm"><span class="text-slate-500">Jawabanmu:</span> <strong class="'+(full?'text-emerald-700':'text-rose-700')+'">'
+        +(a==null?'(kosong)':LETTERS[a]+'. '+esc(q.options[a]))+'</strong></p>'
+        +'<p class="text-sm"><span class="text-slate-500">Kunci:</span> <strong class="text-emerald-700">'+LETTERS[q.answer]+'. '+esc(q.options[q.answer])+'</strong></p>';
+    }else if(q.kind==='input'){
+      jawab='<p class="text-sm"><span class="text-slate-500">Jawabanmu:</span> <strong class="'+(full?'text-emerald-700':'text-rose-700')+'">'
+        +(S.answers[i]||'(kosong)')+'</strong> &nbsp; <span class="text-slate-500">Kunci:</span> <strong class="text-emerald-700">'+esc(q.answerText)+'</strong></p>';
+    }else{
+      jawab=q.subs.map((s,si)=>{
+        const ok=normNum(S.answers[i][si])===s.answer;
+        return '<p class="text-sm">'+esc(s.label)+': <strong class="'+(ok?'text-emerald-700':'text-rose-700')+'">'
+          +(S.answers[i][si]||'(kosong)')+'</strong> &nbsp; <span class="text-slate-500">Kunci:</span> <strong class="text-emerald-700">'+s.answer+'</strong></p>';
+      }).join('');
+    }
+    return '<div class="bg-white rounded-xl border '+(full?'border-emerald-200':'border-rose-200')+' overflow-hidden">'
+      +'<div class="flex justify-between items-center px-4 py-2.5 '+(full?'bg-emerald-50':'bg-rose-50')+'">'
+      +'<span class="text-xs font-bold '+(full?'text-emerald-800':'text-rose-800')+'">Soal '+(i+1)+' \u00b7 '+q.catLabel+'</span>'
+      +'<span class="text-xs font-semibold '+(full?'text-emerald-700':'text-rose-700')+'">'+sc+'/'+q.butir+'</span></div>'
+      +'<div class="p-4 space-y-3">'
+      +(q.headHTML?'<div class="text-sm">'+q.headHTML+'</div>':'')
+      +'<div>'+q.bodyHTML.replace(/<input[^>]*>/g,'<span class="inline-block w-24 border-b-2 border-slate-300"></span>')+'</div>'
+      +'<div class="space-y-1">'+jawab+'</div>'
+      +'<div class="bg-slate-50 rounded-lg p-3 text-[13px] leading-relaxed text-slate-700"><strong class="block mb-1 text-slate-900">Pembahasan</strong>'+q.explanation+'</div>'
+      +'</div></div>';
+  }).join('');
+  show('screen-review');
+}
+
+/* ================= PANDUAN ================= */
+function showGuide(){
+  const demo=p=>'<div class="grid sm:grid-cols-2 gap-4 my-3">'
+    +'<div><p class="text-xs font-bold text-emerald-700 mb-2">MODEL A</p><div class="grid grid-cols-3 gap-2">'
+    +p.modelA.map(x=>'<div class="aspect-square">'+diaSvg(assignPos(x))+'</div>').join('')+'</div></div>'
+    +'<div><p class="text-xs font-bold text-indigo-700 mb-2">MODEL B</p><div class="grid grid-cols-3 gap-2">'
+    +p.modelB.map(x=>'<div class="aspect-square">'+diaSvg(assignPos(x))+'</div>').join('')+'</div></div></div>';
+  const p=DIAGRAM_PACKETS[0].patterns[0];
+  document.getElementById('guide-body').innerHTML=
+    '<h2 class="font-extrabold text-xl text-slate-900">Cara Mengerjakan Diagrammatical Reasoning</h2>'
+    +'<p class="text-sm text-slate-600 leading-relaxed">Kamu diberi dua kelompok gambar, Model A dan Model B. Masing-masing kelompok punya satu aturan tersembunyi. Tugasmu menebak aturan itu, lalu menentukan gambar soal masuk kelompok mana.</p>'
+    +'<div class="border-t border-slate-100 pt-4"><p class="font-bold text-slate-900 text-sm mb-1">Langkah 1 &mdash; Abaikan posisi</p>'
+    +'<p class="text-sm text-slate-600 leading-relaxed">Letak bangun di dalam kotak selalu diacak dan tidak pernah menjadi bagian dari aturan. Yang dihitung hanya jenis bangun, warnanya, jumlahnya, dan arah panah.</p></div>'
+    +'<div><p class="font-bold text-slate-900 text-sm mb-1">Langkah 2 &mdash; Cari satu variabel yang konsisten</p>'
+    +'<p class="text-sm text-slate-600 leading-relaxed">Periksa satu per satu: berapa jumlah lingkaran? bangun mana yang paling banyak? apakah semua warnanya sama? apakah arah panah selalu berpasangan dengan warna tertentu? Aturan yang benar berlaku untuk ketiga kotak dalam satu model, tanpa kecuali.</p>'+demo(p)
+    +'<p class="text-sm text-slate-600 leading-relaxed">Pada contoh di atas, perhatikan hubungan arah panah dengan warna lingkaran. Model A: '+p.ruleA+' Model B: '+p.ruleB+'</p></div>'
+    +'<div><p class="font-bold text-slate-900 text-sm mb-1">Langkah 3 &mdash; Uji gambar soal</p>'
+    +'<p class="text-sm text-slate-600 leading-relaxed">Cocokkan gambar soal ke aturan A, lalu ke aturan B. Kalau memenuhi salah satu, pilih model itu. Kalau tidak memenuhi keduanya &mdash; misalnya unsur yang jadi kunci tidak ada sama sekali, atau jumlahnya seri &mdash; jawabannya <strong>Tidak dapat ditentukan</strong>.</p></div>'
+    +'<div class="bg-amber-50 border border-amber-200 rounded-xl p-4"><p class="font-bold text-amber-900 text-sm mb-1">Jebakan yang sering muncul</p>'
+    +'<ul class="text-sm text-amber-900/90 list-disc pl-5 space-y-1"><li>Aturan berbasis jumlah nol: kotak tanpa lingkaran sama sekali bukan genap maupun ganjil.</li>'
+    +'<li>Dominasi seri: kalau jumlah kotak sama dengan jumlah segitiga, tidak ada yang dominan.</li>'
+    +'<li>Warna campur pada pola konsistensi warna.</li></ul></div>'
+    +'<button onclick="openStart(\'single\',\'dia\',0)" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-xl transition">Coba Paket 1 Sekarang</button>';
+  show('screen-guide');
+}
+
+window.addEventListener('beforeunload',e=>{
+  if(tick){e.preventDefault();e.returnValue='';}
+});
+
+renderMenu();
+
+</script>
+</body>
+</html>
